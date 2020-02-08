@@ -1,11 +1,16 @@
-import { Node } from 'acorn';
-import { asqtHelper } from '../../vendors/helpers/astq.helper';
+import { findModule } from '../../vendors/helpers/traverse.helper';
+import { ModulePattern, ANGULAR_JS_MODULE_PATTERN } from './module.type';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
-export const hasModule = (ast: Node, moduleName: string) => {
-  const query = `
-    //MemberExpression /Identifier [@name=='${moduleName}']
-  `;
-  return [...asqtHelper.query(ast, query)].length > 0;
+
+const hasModule = (source: string, moduleName: ModulePattern): Observable<boolean> => {
+  return findModule(source, moduleName.valueOf()).pipe(
+    map(_ => true)
+  );
 }
 
-export const hasAngularJsModule = (ast: Node) => hasModule(ast, 'angular');
+const hasAngularJsModule = (source: string) => hasModule(source, ANGULAR_JS_MODULE_PATTERN);
+
+const extractModuleDeclaration = (source: string) => findModule(source, ANGULAR_JS_MODULE_PATTERN.valueOf())
+export {hasModule, hasAngularJsModule, extractModuleDeclaration};

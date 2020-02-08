@@ -1,8 +1,6 @@
-import { hasModule } from './module.service';
-import { astParser } from '../../vendors/helpers/ast.helper';
-import { Node } from 'acorn';
+import { hasModule, extractModuleDeclaration } from './module.service';
 describe("ModuleService", () => {
-  let ast: Node;
+  const ANGULAR_JS_MODULE = 'angular';
     const source = `(function () {
       'use strict';
 
@@ -37,11 +35,23 @@ describe("ModuleService", () => {
     })();
 
     `;
-  beforeEach(() => {
-    ast = astParser.parse(source);
+
+
+  test('should have module', (done) => {
+
+    const result = hasModule(source, ANGULAR_JS_MODULE);
+    result.subscribe(r => {
+      expect(r).toBeTruthy();
+      done();
+    })
   });
-fit("should have module", () => {
-    const result = hasModule(ast, 'angular');
-    expect(result).toBe(true);
+
+  test('should extract existing module', (done) => {
+    const result = extractModuleDeclaration(source);
+    result.subscribe(r => {
+      expect(result).toBeTruthy();
+      done();
+    })
   });
+
 });
