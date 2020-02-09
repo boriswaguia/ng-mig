@@ -12,17 +12,16 @@ const findModule = (source: string, modulePattern: string): Observable<TraverseR
     const file = parser.parse(source);
 
     traverse(file, {
-      ExpressionStatement: function(path) {
+      ExpressionStatement: function(modulePath) {
 
         traverse(
-          path.node,
+          modulePath.node,
           {
             noScope: true,
             enter(path2: NodePath) {
               const matchesPatter = matchesPattern(path2.node, modulePattern, true)
-              if (matchesPatter && path.node && path.node.start && path.node.start > 0) {
-                // cb.handle(code, ast, path, path2);
-                const result: TraverseResult = {source, file, path, mathingPath: path2};
+              if (matchesPatter && modulePath.node && modulePath.node.start && modulePath.node.start > 0) {
+                const result: TraverseResult = {source, file, modulePath, matchingPath: path2};
                 observer.next(result);
                 observer.complete();
               }
@@ -35,4 +34,4 @@ const findModule = (source: string, modulePattern: string): Observable<TraverseR
   });
 }
 
-export {findModule};
+export { findModule, parser };

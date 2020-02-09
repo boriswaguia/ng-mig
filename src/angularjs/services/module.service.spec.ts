@@ -1,40 +1,7 @@
 import { hasModule, extractModuleDeclaration } from './module.service';
+import { source } from '../../helpers/test.data';
 describe("ModuleService", () => {
   const ANGULAR_JS_MODULE = 'angular';
-    const source = `(function () {
-      'use strict';
-
-      angular
-          .module('ak', [
-              'ak.home.ui',
-              'ak.navbar.ui',
-              'ak.footer.ui',
-              'ui.router'
-          ])
-          .config(route);
-
-
-      function route($urlRouterProvider, $stateProvider) {
-          $urlRouterProvider.otherwise('/');
-
-          $stateProvider
-              .state('ak', {
-                  abstract: true,
-                  url: '',
-                  templateUrl: 'app/app.html',
-                  views: {
-                      'header': {
-                          template: '<ak-navbar></ak-navbar>'
-                      },
-                      'footer': {
-                          template: '<ak-footer></ak-footer>'
-                      }
-                  }
-              });
-      }
-    })();
-
-    `;
 
 
   test('should have module', (done) => {
