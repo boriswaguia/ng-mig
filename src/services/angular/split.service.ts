@@ -9,7 +9,7 @@ import { File, Identifier } from '@babel/types';
 import * as fs from 'fs';
 
 
-function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration>, sourceTemplate: any, contentId: string, contentName: string) {
+function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration>, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
 
   const code = generate((xPath.node as Node)).code
 
@@ -20,26 +20,28 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
 
   const p = program(result);
   const controllerContent = generate(p).code;
-  fs.writeFileSync(`${contentId.toLowerCase()}.${contentName}.ts`, controllerContent);
+  currentDir = currentDir ? currentDir + '/': '';
+
+  fs.writeFileSync(`${currentDir}${contentId.toLowerCase()}.${contentName}.ts`, controllerContent);
 }
 
-function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string) {
+function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
   traverse(file, {
     VariableDeclaration: function(xPath) {
       const declaration = xPath.node.declarations.filter(x => (x.id as Identifier).name === contentId);
       if (declaration.length > 0) {
-        writeContentToFile(xPath, sourceTemplate, contentId, contentName);
+        writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
     },
     FunctionDeclaration: function(xPath) {
       if(xPath.node.id?.name === contentId) {
-        writeContentToFile(xPath, sourceTemplate, contentId, contentName);
+        writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
     }
   })
 }
 
-function extract(expression: CallExpression, file: File, fileTemplate: string) {
+function extract(expression: CallExpression, file: File, fileTemplate: string, currentDir: string) {
 
   const sourceTemplate = template(fileTemplate, {
     allowImportExportEverywhere: true
@@ -59,18 +61,18 @@ function extract(expression: CallExpression, file: File, fileTemplate: string) {
       }
       console.log(`${callerName} - ${functionId}`);
 
-      extractContentToFile(file, sourceTemplate, functionId, callerName);
+      extractContentToFile(file, sourceTemplate, functionId, callerName, currentDir);
       if (callee.object.type === "CallExpression") {
-        extract(callee.object, file, fileTemplate);
+        extract(callee.object, file, fileTemplate, currentDir);
       }
     }
   } else {
     if(expression.callee.type === "MemberExpression" && expression.callee.object.type === "CallExpression") {
-      extract(expression.callee.object, file, fileTemplate);
+      extract(expression.callee.object, file, fileTemplate, currentDir);
     }
   }
 }
-const splitDeclaration = (traverseResult: TraverseResult): void => {
+const splitDeclaration = (traverseResult: TraverseResult, currentDir: string): void => {
 
   const {file, modulePath} = traverseResult
 
@@ -79,9 +81,12 @@ const splitDeclaration = (traverseResult: TraverseResult): void => {
 
   const fileTemplate = `
   'use strict';
+
   import _ from 'lodash';
 
+
   %%content%%
+
 
   export { %%contentId%% };
 
@@ -89,7 +94,7 @@ const splitDeclaration = (traverseResult: TraverseResult): void => {
 
   if (node.expression.type === "CallExpression") {
     const expression: CallExpression = node.expression;
-    extract(expression, file, fileTemplate);
+    extract(expression, file, fileTemplate, currentDir);
   }
 };
 

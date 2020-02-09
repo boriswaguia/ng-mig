@@ -11,7 +11,7 @@ describe('ModuleSplitService', () => {
   test('should extract four files with from a given module', (done) => {
     const traverseResult = extractModuleDeclaration(source);
     traverseResult.subscribe(r => {
-      splitDeclaration(r);
+      splitDeclaration(r, 'testdata/src');
       // expect(result).toHaveLength(4)
       done();
     })

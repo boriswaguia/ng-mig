@@ -9,6 +9,6 @@
     "target": "es2017"
   },
   "include": [
-    "src/**/*"
+    "src/**/*", "testdata/src/angularjs-module-sample.mock.js"
   ]
 }
