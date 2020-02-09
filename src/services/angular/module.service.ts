@@ -1,5 +1,5 @@
 import { findModule } from '../../vendors/helpers/traverse.helper';
-import { ModulePattern, ANGULAR_JS_MODULE_PATTERN } from '../module.type';
+import { ModulePattern, ANGULAR_JS_MODULE_PATTERN } from './module.type';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
