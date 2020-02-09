@@ -1,29 +1,39 @@
 import { TraverseResult } from '../../vendors/helpers/traverse-result';
-import { CallExpression, MemberExpression, program, Statement } from '@babel/types';
-import traverse from '@babel/traverse';
+import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration } from '@babel/types';
+import traverse, { NodePath } from '@babel/traverse';
 import template from '@babel/template';
 import generate from '@babel/generator';
 import { Node } from '@babel/types';
-import { File } from '@babel/types';
+import { File, Identifier } from '@babel/types';
 
 import * as fs from 'fs';
 
-function extractContentToFile(file: File, sourceTemplate: any, contentId: string) {
+
+function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration>, sourceTemplate: any, contentId: string, contentName: string) {
+
+  const code = generate((xPath.node as Node)).code
+
+  const result = sourceTemplate({
+    content: code,
+    contentId
+  }) as Statement[];
+
+  const p = program(result);
+  const controllerContent = generate(p).code;
+  fs.writeFileSync(`${contentId.toLowerCase()}.${contentName}.ts`, controllerContent);
+}
+
+function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string) {
   traverse(file, {
+    VariableDeclaration: function(xPath) {
+      const declaration = xPath.node.declarations.filter(x => (x.id as Identifier).name === contentId);
+      if (declaration.length > 0) {
+        writeContentToFile(xPath, sourceTemplate, contentId, contentName);
+      }
+    },
     FunctionDeclaration: function(xPath) {
-      // jsonPrint('controller', xPath.node);
-      if(xPath.isFunctionDeclaration() && xPath.node.loc && xPath.node.id && xPath.node.id.name === contentId) {
-
-        const code = generate((xPath.node as Node)).code
-
-        const result = sourceTemplate({
-          content: code,
-          contentId
-        }) as Statement[];
-
-        const p = program(result);
-        const controllerContent = generate(p).code;
-        fs.writeFileSync(`${contentId.toLowerCase()}.component.ts`, controllerContent);
+      if(xPath.node.id?.name === contentId) {
+        writeContentToFile(xPath, sourceTemplate, contentId, contentName);
       }
     }
   })
@@ -49,7 +59,7 @@ function extract(expression: CallExpression, file: File, fileTemplate: string) {
       }
       console.log(`${callerName} - ${functionId}`);
 
-      extractContentToFile(file, sourceTemplate, functionId);
+      extractContentToFile(file, sourceTemplate, functionId, callerName);
       if (callee.object.type === "CallExpression") {
         extract(callee.object, file, fileTemplate);
       }
