@@ -1,17 +1,20 @@
 import { TraverseResult } from '../../vendors/helpers/traverse-result';
 import { extractModuleDeclaration } from './module.service';
-import { source } from '../../helpers/test.data';
 
 import template from "@babel/template";
 import generate from "@babel/generator";
 import * as t from "@babel/types";
 import { splitDeclaration } from './split.service';
+import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
+import { openFile } from '../../vendors/helpers/file.helper';
 
 describe('ModuleSplitService', () => {
   test('should extract four files with from a given module', (done) => {
+    const filePath = 'testdata/src/angularjs-module-sample.mock.js';
+    const source = openFile(filePath);
     const traverseResult = extractModuleDeclaration(source);
     traverseResult.subscribe(r => {
-      splitDeclaration(r, 'testdata/src');
+      splitDeclaration(r, filePath);
       // expect(result).toHaveLength(4)
       done();
     })

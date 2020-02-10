@@ -1,5 +1,5 @@
 import { TraverseResult } from '../../vendors/helpers/traverse-result';
-import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration } from '@babel/types';
+import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement } from '@babel/types';
 import traverse, { NodePath } from '@babel/traverse';
 import template from '@babel/template';
 import generate from '@babel/generator';
@@ -7,7 +7,11 @@ import { Node } from '@babel/types';
 import { File, Identifier } from '@babel/types';
 
 import * as fs from 'fs';
+import { dirName, fileName } from '../../vendors/helpers/file.helper';
+import { FilePath } from './module.type';
 
+
+const getFileName = (currentDir: string, contentId: string, contentName: string) => `${currentDir}${contentId.toLowerCase()}.${contentName}.ts`;
 
 function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration>, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
 
@@ -21,7 +25,7 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
   const p = program(result);
   const controllerContent = generate(p).code;
   currentDir = currentDir ? currentDir + '/': '';
-  const newFile = `${currentDir}${contentId.toLowerCase()}.${contentName}.ts`;
+  const newFile = getFileName(currentDir, contentId, contentName);
   console.log('newFile', newFile);
   fs.writeFileSync(newFile, controllerContent);
 }
@@ -42,7 +46,7 @@ function extractContentToFile(file: File, sourceTemplate: any, contentId: string
   })
 }
 
-function extract(expression: CallExpression, file: File, fileTemplate: string, currentDir: string) {
+function extract(expression: CallExpression, file: File, fileTemplate: string, currentDir: string, importAccumulator: Map<string, string>) {
 
   const sourceTemplate = template(fileTemplate, {
     allowImportExportEverywhere: true
@@ -54,27 +58,70 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
       const callerName = callee.property['name']; // can be .config(..) .controller('xx',..), .constanst
       const argument = expression.arguments.length === 1 ? expression.arguments[0] : expression.arguments[1];
 
-      let functionId = ""
+      let argumentId = ""
       if(argument.type === "StringLiteral") {
-        functionId = argument.value;
+        argumentId = argument.value;
       } else if(argument.type === "Identifier") {
-        functionId = argument.name;
+        argumentId = argument.name;
       }
-      console.log(`${callerName} - ${functionId}`);
+      console.log(`${callerName} - ${argumentId}`);
 
-      extractContentToFile(file, sourceTemplate, functionId, callerName, currentDir);
+      if (argumentId) {
+        importAccumulator.set(argumentId, callerName);
+        extractContentToFile(file, sourceTemplate, argumentId, callerName, currentDir);
+      }
       if (callee.object.type === "CallExpression") {
-        extract(callee.object, file, fileTemplate, currentDir);
+        extract(callee.object, file, fileTemplate, currentDir, importAccumulator);
       }
     }
   } else {
     if(expression.callee.type === "MemberExpression" && expression.callee.object.type === "CallExpression") {
-      extract(expression.callee.object, file, fileTemplate, currentDir);
+      extract(expression.callee.object, file, fileTemplate, currentDir, importAccumulator);
     }
   }
 }
-const splitDeclaration = (traverseResult: TraverseResult, currentDir: string): void => {
 
+const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAccumulator: Map<string, string>) => {
+  const newModuleTemplate = `
+  'use strict';
+
+  import * as angular from 'angular'
+
+
+  %%moduleImports%%
+
+
+  %%moduleDeclaration%%
+
+
+  `;
+
+  const moduleTemplate = template(newModuleTemplate, {
+    allowImportExportEverywhere: true
+  });
+
+  let moduleImports: string = ``;
+ importAccumulator.forEach((value, key) => {
+   const importS = `import { ${key} } from './${key.toLowerCase()}.${value}'; \n`;
+   moduleImports = moduleImports + importS;
+ });
+
+ console.log('import', moduleImports);
+
+ const result = moduleTemplate({
+    moduleImports,
+    moduleDeclaration: generate(node).code
+  }) as Statement[];
+  const p = program(result);
+
+  const controllerContent = generate(p).code;
+
+  const name = fileName(filePath).replace('.js', '');
+  const newFile = getFileName(dirName(filePath)+'/', name, 'module');
+  console.log('newFileModule', newFile);
+  fs.writeFileSync(newFile, controllerContent);
+}
+const splitDeclaration = (traverseResult: TraverseResult, filePath: FilePath): void => {
   const {file, modulePath} = traverseResult
 
   const node = modulePath.node;
@@ -95,7 +142,14 @@ const splitDeclaration = (traverseResult: TraverseResult, currentDir: string): v
 
   if (node.expression.type === "CallExpression") {
     const expression: CallExpression = node.expression;
-    extract(expression, file, fileTemplate, currentDir);
+    const importAccumulator = new Map<string, string>();
+    extract(expression, file, fileTemplate, dirName(filePath), importAccumulator);
+
+    if (importAccumulator.size > 0) {
+      console.log('importAccumulator', importAccumulator);
+      createNewModule(filePath, node, importAccumulator);
+      fs.renameSync(filePath, filePath+'.processed');
+    }
   }
 };
 
