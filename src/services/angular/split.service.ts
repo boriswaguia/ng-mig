@@ -21,8 +21,9 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
   const p = program(result);
   const controllerContent = generate(p).code;
   currentDir = currentDir ? currentDir + '/': '';
-
-  fs.writeFileSync(`${currentDir}${contentId.toLowerCase()}.${contentName}.ts`, controllerContent);
+  const newFile = `${currentDir}${contentId.toLowerCase()}.${contentName}.ts`;
+  console.log('newFile', newFile);
+  fs.writeFileSync(newFile, controllerContent);
 }
 
 function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {

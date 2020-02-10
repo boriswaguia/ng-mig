@@ -16,4 +16,8 @@ const processFile = (filePath: FilePath) => {
     );
 }
 
-export {processFile}
+const processFiles = (filePaths: FilePath[]): void => filePaths.forEach(p => {
+  processFile(p).subscribe(r => console.log(`processing ${p} is node`));
+});
+
+export { processFile, processFiles }
