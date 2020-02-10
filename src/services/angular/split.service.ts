@@ -1,5 +1,5 @@
 import { TraverseResult } from '../../vendors/helpers/traverse-result';
-import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement } from '@babel/types';
+import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement, ClassDeclaration } from '@babel/types';
 import traverse, { NodePath } from '@babel/traverse';
 import template from '@babel/template';
 import generate from '@babel/generator';
