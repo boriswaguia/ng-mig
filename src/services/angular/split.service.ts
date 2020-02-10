@@ -11,9 +11,9 @@ import { dirName, fileName } from '../../vendors/helpers/file.helper';
 import { FilePath } from './module.type';
 
 
-const getFileName = (currentDir: string, contentId: string, contentName: string) => `${currentDir}${contentId.toLowerCase()}.${contentName}.ts`;
+const getFileName = (currentDir: string, contentId: string, contentName: string) => `${currentDir}${contentId.toLowerCase()}.${contentName}.js`;
 
-function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration>, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
+function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration | ClassDeclaration>, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
 
   const code = generate((xPath.node as Node)).code
 
@@ -42,6 +42,11 @@ function extractContentToFile(file: File, sourceTemplate: any, contentId: string
       if(xPath.node.id?.name === contentId) {
         writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
+    },
+    ClassDeclaration: function(xPath) {
+      if(xPath.node.id?.name === contentId) {
+        writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
+      }
     }
   })
 }
@@ -59,7 +64,7 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
       const argument = expression.arguments.length === 1 ? expression.arguments[0] : expression.arguments[1];
 
       let argumentId = ""
-      if(argument.type === "StringLiteral") {
+      if(argument.type === "StringLiteral" && callerName !== "constant") {
         argumentId = argument.value;
       } else if(argument.type === "Identifier") {
         argumentId = argument.name;
