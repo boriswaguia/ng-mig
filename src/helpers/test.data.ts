@@ -1,4 +1,12 @@
-export const source: string = `(function () {
+
+import * as path from 'path';
+import * as os from 'os';
+import * as fs from 'fs';
+const rimraf = require('rimraf');
+
+
+
+const source: string = `(function () {
   'use strict';
 
   var EMPLOYEES = [
@@ -39,3 +47,23 @@ export const source: string = `(function () {
   }
 })();
 `;
+
+
+const createTestData = (testName: string) => {
+  const tmpDir = path.join(os.tmpdir(), 'ng-mig', testName, 'testdata', 'src');
+  fs.mkdirSync(tmpDir, {recursive: true});
+  const fileName = 'angularjs-module-sample.mock.js';
+  const destFile = tmpDir+'/'+fileName;
+  fs.copyFileSync('testdata/src/'+fileName, destFile);
+  return destFile;
+};
+
+
+
+const deleteTestData = (testName: string) => {
+  const dir = path.join(os.tmpdir(), 'ng-mig', testName);
+    rimraf.sync(dir);
+    expect(fs.existsSync(dir)).toBeFalsy();
+}
+
+export { source, createTestData, deleteTestData };

@@ -6,7 +6,6 @@ const getSourceFiles = (rootDir: string): string[] => {
     .paths(srcDir)
     .ext('js')
     .findSync();
-    console.log('result', result);
     return result;
 };
 
