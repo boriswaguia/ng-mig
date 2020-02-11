@@ -1,7 +1,7 @@
-import { ANGULAR_JS_MODULE_PATTERN, FilePath } from './angular/module.type';
+import { ANGULAR_JS_MODULE_PATTERN, FilePath } from './split/module.type';
 import { findModule } from '../vendors/helpers/traverse.helper';
 import { tap } from 'rxjs/operators';
-import { splitDeclaration } from './angular/split.service';
+import { splitDeclaration } from './split/split.service';
 import { openFile } from '../vendors/helpers/file.helper';
 
 const processFile = (filePath: FilePath) => {
