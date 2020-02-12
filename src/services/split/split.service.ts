@@ -6,8 +6,7 @@ import generate from '@babel/generator';
 import { Node } from '@babel/types';
 import { File, Identifier } from '@babel/types';
 
-import * as fs from 'fs';
-import { dirName, fileName } from '../../vendors/helpers/file.helper';
+import { dirName, fileName, writeFileSync, renameSync } from '../../vendors/helpers/file.helper';
 import { FilePath } from './module.type';
 
 
@@ -27,7 +26,7 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
   currentDir = currentDir ? currentDir + '/': '';
   const newFile = getFileName(currentDir, contentId, contentName);
   console.log('newFile', newFile);
-  fs.writeFileSync(newFile, controllerContent);
+  writeFileSync(newFile, controllerContent);
 }
 
 function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
@@ -124,7 +123,7 @@ const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAc
   const name = fileName(filePath).replace('.js', '');
   const newFile = getFileName(dirName(filePath)+'/', name, 'module');
   console.log('newFileModule', newFile);
-  fs.writeFileSync(newFile, controllerContent);
+  writeFileSync(newFile, controllerContent);
 }
 const splitDeclaration = (traverseResult: TraverseResult, filePath: FilePath): void => {
   const {file, modulePath} = traverseResult
@@ -153,7 +152,7 @@ const splitDeclaration = (traverseResult: TraverseResult, filePath: FilePath): v
     if (importAccumulator.size > 0) {
       console.log('importAccumulator', importAccumulator);
       createNewModule(filePath, node, importAccumulator);
-      fs.renameSync(filePath, filePath+'.processed');
+      renameSync(filePath, filePath+'.processed');
     }
   }
 };

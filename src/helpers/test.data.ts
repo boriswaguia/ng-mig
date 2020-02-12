@@ -1,7 +1,8 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import * as fs from 'fs';
+import * as fse from 'fs-extra';
+import { existsSync, copySync, mkdirSync } from '../vendors/helpers/file.helper';
 const rimraf = require('rimraf');
 
 
@@ -50,12 +51,11 @@ const source: string = `(function () {
 
 
 const createTestData = (testName: string) => {
-  const tmpDir = path.join(os.tmpdir(), 'ng-mig', testName, 'testdata', 'src');
-  fs.mkdirSync(tmpDir, {recursive: true});
-  const fileName = 'angularjs-module-sample.mock.js';
-  const destFile = tmpDir+'/'+fileName;
-  fs.copyFileSync('testdata/src/'+fileName, destFile);
-  return destFile;
+  const tmpDir = path.join(os.tmpdir(), 'ng-mig', testName);
+  mkdirSync(tmpDir);
+  console.log('tmpdir', tmpDir);
+  copySync('testdata/', tmpDir);
+  return tmpDir;
 };
 
 
@@ -63,7 +63,7 @@ const createTestData = (testName: string) => {
 const deleteTestData = (testName: string) => {
   const dir = path.join(os.tmpdir(), 'ng-mig', testName);
     rimraf.sync(dir);
-    expect(fs.existsSync(dir)).toBeFalsy();
+    expect(existsSync(dir)).toBeFalsy();
 }
 
 export { source, createTestData, deleteTestData };

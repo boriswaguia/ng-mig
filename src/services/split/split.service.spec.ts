@@ -9,7 +9,7 @@ describe("ModuleSplitService", () => {
   let filePath = "";
 
   beforeEach(() => {
-    filePath = createTestData(TEST_NAME);
+    filePath = createTestData(TEST_NAME)+'/src/app/employees/employees.ui.js';
   });
 
 

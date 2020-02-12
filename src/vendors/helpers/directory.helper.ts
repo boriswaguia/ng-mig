@@ -1,8 +1,9 @@
-import * as fs from 'fs';
-
+import { existsSync } from './file.helper';
 
 const getCurrentDir = () => './';
 
-const dirExist = (dir: string) => fs.existsSync(dir);
+const dirExist = (dir: string) => existsSync(dir);
 
-export { getCurrentDir, dirExist };
+const copyRecursive = (src: string, dest: string) => {}
+
+export { getCurrentDir, dirExist, copyRecursive };

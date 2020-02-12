@@ -3,13 +3,13 @@ import { createTestData, deleteTestData } from "../helpers/test.data";
 
 describe("ProcessFileService", () => {
   const TEST_NAME = 'ProcessFileService';
-  let filePath = '';
+  let testDir = '';
   beforeEach(() => {
-    filePath = createTestData(TEST_NAME);
+    testDir = createTestData(TEST_NAME);
   });
 
   test("should read file contain and extract it", done => {
-    processFile(filePath).subscribe(result => {
+    processFile(testDir+'/src/app/employees/employees.ui.js').subscribe(result => {
       expect(result).toBeTruthy();
       done();
     });
@@ -17,6 +17,6 @@ describe("ProcessFileService", () => {
 
 
   afterEach(() => {
-    deleteTestData(TEST_NAME);
+    // deleteTestData(TEST_NAME);
   });
 });
