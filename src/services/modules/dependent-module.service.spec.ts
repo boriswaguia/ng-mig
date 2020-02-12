@@ -52,12 +52,13 @@ describe('DependentModuleImport', () => {
   });
 
   test('should import dependencies of projcet', (done) => {
-    forkJoin(
-      importModulesForFolder(testDir)
-    ).subscribe(() => {
-      console.log('Import finished');
-      done();
-    })
+
+    importModulesForFolder(testDir).subscribe(r => {
+      r.subscribe(newFileContent => {
+        console.log('Import finished');
+        done();
+      })
+    });
   });
 
   afterEach(() => {

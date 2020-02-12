@@ -2,7 +2,7 @@ import { FilePath, FolderPath } from '../split/module.type';
 import { openFile } from '../../vendors/helpers/file.helper';
 import { findModuleCallExpression } from '../../vendors/helpers/traverse.helper';
 import { Observable, of, forkJoin } from 'rxjs';
-import { map as maprx, map, filter } from 'rxjs/operators';
+import { map as maprx, map, filter, flatMap } from 'rxjs/operators';
 import { CallExpression } from '@babel/types';
 import traverse from "@babel/traverse";
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
@@ -105,7 +105,7 @@ const importModulesForFiles = (files: FilePath[], registry: Map<string, BasicMod
 
 const importModulesForFolder = (folder: FolderPath) => {
   return extractFolderDependenciesList(folder).pipe(
-    map(registry => importModulesForFiles(getSourceFiles(folder), registry))
+    flatMap(registry => importModulesForFiles(getSourceFiles(folder), registry))
   )
 }
 

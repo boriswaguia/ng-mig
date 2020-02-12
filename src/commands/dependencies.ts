@@ -1,6 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import { getCurrentDir, dirExist } from '../vendors/helpers/directory.helper'
 import { importModulesForFolder } from '../services/modules/dependent-module.service'
+import { forkJoin } from 'rxjs'
 
 export default class Dependencies extends Command {
   static description = 'Scan all module files and fix missing modules imports'
@@ -23,9 +24,11 @@ export default class Dependencies extends Command {
 
     if (dirExist(project + "/src")) {
       this.log("----------------------- Started to import modules -------------------");
-      importModulesForFolder(project).subscribe(_ => {
-        this.log("----------------------- Finished to import modules -------------------");
-      })
+      importModulesForFolder(project).subscribe(r => {
+        r.subscribe(_ => {
+          this.log("New file import completed ...");
+        })
+      });
     } else {
       this.log(
         `This is not a valid project folder. Make sure you have a directory src/ in this folder. ${project}`
