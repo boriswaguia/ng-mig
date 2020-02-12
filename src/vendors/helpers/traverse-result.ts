@@ -1,9 +1,16 @@
-import { File, ExpressionStatement } from '@babel/types';
+import { File, ExpressionStatement, CallExpression } from '@babel/types';
 import { NodePath } from '@babel/traverse';
 
-export interface TraverseResult{
+interface TraverseResult {
   source: string;
   file: File;
-  modulePath: NodePath<ExpressionStatement>;
   matchingPath: NodePath
+}
+
+export interface TraverseResultExpressionStatement extends TraverseResult {
+  modulePath: NodePath<ExpressionStatement>;
+}
+
+export interface TraverseResultCallExpression extends TraverseResult{
+  modulePath: NodePath<CallExpression>;
 }

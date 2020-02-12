@@ -1,4 +1,4 @@
-import { findModule } from './traverse.helper';
+import { findModule, findModuleCallExpression } from './traverse.helper';
 import { source } from '../../helpers/test.data';
 
 describe("TransveralHelper", () => {
@@ -13,4 +13,17 @@ describe("TransveralHelper", () => {
       done();
     }, err => console.log(err));
   });
+
+  test('should find .module call expression', (done) => {
+    const result = findModuleCallExpression(source);
+    result.subscribe(r => {
+      expect(r.file).toBeTruthy();
+      expect(r.matchingPath).toBeTruthy();
+      expect(r.modulePath).toBeTruthy();
+      expect(r.source).toBeTruthy();
+      expect(r.modulePath).toEqual(r.matchingPath);
+      done();
+    }, err => console.log('err', err));
+  });
+
 });

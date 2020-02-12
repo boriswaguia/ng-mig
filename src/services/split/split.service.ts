@@ -1,4 +1,4 @@
-import { TraverseResult } from '../../vendors/helpers/traverse-result';
+import { TraverseResultExpressionStatement } from '../../vendors/helpers/traverse-result';
 import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement, ClassDeclaration } from '@babel/types';
 import traverse, { NodePath } from '@babel/traverse';
 import template from '@babel/template';
@@ -125,7 +125,7 @@ const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAc
   console.log('newFileModule', newFile);
   writeFileSync(newFile, controllerContent);
 }
-const splitDeclaration = (traverseResult: TraverseResult, filePath: FilePath): void => {
+const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, filePath: FilePath): void => {
   const {file, modulePath} = traverseResult
 
   const node = modulePath.node;
