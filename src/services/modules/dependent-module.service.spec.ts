@@ -32,9 +32,8 @@ describe('DependentModuleImport', () => {
     const expectedDepModules = ['ak.home.ui', 'ak.navbar.ui', 'ak.footer.ui', 'ui.router'];
 
     extractBasicModule(modulePath).subscribe(r => {
-      expect(r).not.toBeUndefined();
-      expect(r?.id).toBe(expectedId);
-      expect(r?.required).toEqual(expectedDepModules);
+      expect(r.id).toBe(expectedId);
+      expect(r.required).toEqual(expectedDepModules);
       done();
     }, err => {
       console.log('result', err);
