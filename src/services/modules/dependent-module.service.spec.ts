@@ -33,7 +33,7 @@ describe('DependentModuleImport', () => {
     })
   });
 
-  test('build dependency lists', (done) => {
+  test('build dependency lists of all project modules files', (done) => {
     const files = getSourceFiles(testDir);
     extractFilesDependenciesList(files).subscribe(registry => {
       expect(registry.size).toBe(5);
