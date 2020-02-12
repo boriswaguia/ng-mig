@@ -17,6 +17,6 @@ describe("ProcessFileService", () => {
 
 
   afterEach(() => {
-    // deleteTestData(TEST_NAME);
+    deleteTestData(TEST_NAME);
   });
 });
