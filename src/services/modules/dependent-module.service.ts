@@ -45,7 +45,7 @@ const extractBasicModule = (file: FilePath): Observable<BasicModule> => {
   )
 };
 
-const extractFilesDependenciesList = (files: FilePath[]) => {
+const extractFilesDependenciesList = (files: FilePath[]): Observable<Map<string, BasicModule>> => {
     const obs: Observable<BasicModule>[] = [];
     files.forEach(f => obs.push(extractBasicModule(f)));
     return forkJoin(obs).pipe(
@@ -58,7 +58,7 @@ const extractFilesDependenciesList = (files: FilePath[]) => {
 }
 
 
-const extractFolderDependenciesList = (folder: FolderPath) => {
+const extractFolderDependenciesList = (folder: FolderPath): Observable<Map<string, BasicModule>> => {
   return extractFilesDependenciesList(getSourceFiles(folder))
 }
 
@@ -103,8 +103,10 @@ const importModulesForFiles = (files: FilePath[], registry: Map<string, BasicMod
   return files.map(f => importModules(f, registry));
 };
 
-const importModulesForFolder = (folder: FolderPath, registry: Map<string, BasicModule>) => {
-  return importModulesForFiles(getSourceFiles(folder), registry);
+const importModulesForFolder = (folder: FolderPath) => {
+  return extractFolderDependenciesList(folder).pipe(
+    map(registry => importModulesForFiles(getSourceFiles(folder), registry))
+  )
 }
 
 export { extractBasicModule, extractFilesDependenciesList, extractFolderDependenciesList, importModules, importModulesForFolder };
