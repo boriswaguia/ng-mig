@@ -1,9 +1,11 @@
 import { deleteTestData, createTestData, mapData } from '../../helpers/test.data';
 import { processFolder } from '../process-file.service';
-import { extractBasicModule, extractFilesDependenciesList, importModules, BasicModule } from './dependent-module.service';
+import { extractBasicModule, extractFilesDependenciesList, importModules, BasicModule, importModulesForFolder } from './dependent-module.service';
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 import { jsonPrint } from '../../helpers/print.helper';
 import { map_to_object } from '../../helpers/map.helper';
+import { flatMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 
 describe('DependentModuleImport', () => {
   const TEST_NAME = 'DependentModuleImport';
@@ -50,6 +52,15 @@ describe('DependentModuleImport', () => {
       expect(result).toContain(`import './home/home.ui.module';`);
       done();
     });
+  });
+
+  test('should import dependencies of projcet', (done) => {
+    forkJoin(
+      importModulesForFolder(testDir, mapData())
+    ).subscribe(r => {
+      console.log('Import finished');
+      done();
+    })
   });
 
   afterEach(() => {

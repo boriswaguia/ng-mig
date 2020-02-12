@@ -97,5 +97,14 @@ const importModules = (filePath: FilePath, registry: Map<string, BasicModule>): 
       return openFile(basicModule.filePath);
     })
   )
+};
+
+const importModulesForFiles = (files: FilePath[], registry: Map<string, BasicModule>) => {
+  return files.map(f => importModules(f, registry));
+};
+
+const importModulesForFolder = (folder: FolderPath, registry: Map<string, BasicModule>) => {
+  return importModulesForFiles(getSourceFiles(folder), registry);
 }
-export { extractBasicModule, extractFilesDependenciesList, extractFolderDependenciesList, importModules };
+
+export { extractBasicModule, extractFilesDependenciesList, extractFolderDependenciesList, importModules, importModulesForFolder };
