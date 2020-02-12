@@ -3,9 +3,26 @@ import * as path from 'path';
 import * as os from 'os';
 import * as fse from 'fs-extra';
 import { existsSync, copySync, mkdirSync } from '../vendors/helpers/file.helper';
+import { BasicModule } from '../services/modules/dependent-module.service';
 const rimraf = require('rimraf');
 
 
+
+const createTestData = (testName: string) => {
+  const tmpDir = path.join(os.tmpdir(), 'ng-mig', testName);
+  mkdirSync(tmpDir);
+  console.log('tmpdir', tmpDir);
+  copySync('testdata/', tmpDir);
+  return tmpDir;
+};
+
+
+
+const deleteTestData = (testName: string) => {
+  const dir = path.join(os.tmpdir(), 'ng-mig', testName);
+    rimraf.sync(dir);
+    expect(existsSync(dir)).toBeFalsy();
+}
 
 const source: string = `(function () {
   'use strict';
@@ -49,21 +66,58 @@ const source: string = `(function () {
 })();
 `;
 
+const mapDataObj = `{
+  "ak": {
+    "id": "ak",
+    "required": [
+      "ak.home.ui",
+      "ak.navbar.ui",
+      "ak.footer.ui",
+      "ui.router"
+    ],
+    "filePath": "/var/folders/dq/fk8v17gd3zgfj44nk1fsy1180000gn/T/ng-mig/DependentModuleImport/src/app/app.module.js"
+  },
+  "ak.datatypes.text.ui": {
+    "id": "ak.datatypes.text.ui",
+    "required": [],
+    "filePath": "/var/folders/dq/fk8v17gd3zgfj44nk1fsy1180000gn/T/ng-mig/DependentModuleImport/src/app/datatypes/text.ui.module.js"
+  },
+  "ak.employees.ui": {
+    "id": "ak.employees.ui",
+    "required": [
+      "ui.router",
+      "smart-table"
+    ],
+    "filePath": "/var/folders/dq/fk8v17gd3zgfj44nk1fsy1180000gn/T/ng-mig/DependentModuleImport/src/app/employees/employees.ui.module.js"
+  },
+  "ak.home.ui": {
+    "id": "ak.home.ui",
+    "required": [
+      "ak.employees.ui",
+      "ak.profile.ui",
+      "ui.router"
+    ],
+    "filePath": "/var/folders/dq/fk8v17gd3zgfj44nk1fsy1180000gn/T/ng-mig/DependentModuleImport/src/app/home/home.ui.module.js"
+  },
+  "ak.profile.ui": {
+    "id": "ak.profile.ui",
+    "required": [
+      "ak.datatypes",
+      "ngMessages",
+      "ui.router"
+    ],
+    "filePath": "/var/folders/dq/fk8v17gd3zgfj44nk1fsy1180000gn/T/ng-mig/DependentModuleImport/src/app/profile/profile.ui.module.js"
+  }
+}`
 
-const createTestData = (testName: string) => {
-  const tmpDir = path.join(os.tmpdir(), 'ng-mig', testName);
-  mkdirSync(tmpDir);
-  console.log('tmpdir', tmpDir);
-  copySync('testdata/', tmpDir);
-  return tmpDir;
-};
-
-
-
-const deleteTestData = (testName: string) => {
-  const dir = path.join(os.tmpdir(), 'ng-mig', testName);
-    rimraf.sync(dir);
-    expect(existsSync(dir)).toBeFalsy();
+const mapData = (): Map<string, BasicModule> => {
+  const result = new Map<string, BasicModule>();
+  const raw = JSON.parse(mapDataObj)
+  Object.keys(raw).forEach(id => {
+    result.set(id, raw[id]);
+  });
+  return result;
 }
 
-export { source, createTestData, deleteTestData };
+
+export { source, createTestData, deleteTestData, mapData };

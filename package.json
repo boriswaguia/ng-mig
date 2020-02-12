@@ -17,6 +17,7 @@
     "@types/fs-extra": "^8.0.1",
     "filehound": "^1.17.3",
     "fs-extra": "^8.1.0",
+    "insert-line": "^1.1.0",
     "relative": "^3.0.2",
     "rxjs": "^6.5.4",
     "tslib": "^1.10.0"

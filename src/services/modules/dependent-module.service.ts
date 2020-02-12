@@ -1,11 +1,14 @@
 import { FilePath, FolderPath } from '../split/module.type';
 import { openFile } from '../../vendors/helpers/file.helper';
 import { findModuleCallExpression } from '../../vendors/helpers/traverse.helper';
-import { Observable, of, throwError, forkJoin } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 import { map as maprx, map, filter } from 'rxjs/operators';
 import { CallExpression } from '@babel/types';
-import { jsonPrint } from '../../helpers/print.helper';
+import traverse from "@babel/traverse";
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
+import { relativeImportPath } from '../../vendors/helpers/relative.helper';
+import * as parser from "@babel/parser";
+const insertLine = require('insert-line');
 
 export interface BasicModule {
   id: string,
@@ -58,4 +61,41 @@ const extractFilesDependenciesList = (files: FilePath[]) => {
 const extractFolderDependenciesList = (folder: FolderPath) => {
   return extractFilesDependenciesList(getSourceFiles(folder))
 }
-export { extractBasicModule, extractFilesDependenciesList, extractFolderDependenciesList };
+
+const importModules = (filePath: FilePath, registry: Map<string, BasicModule>): Observable<string> => {
+
+  return extractBasicModule(filePath).pipe(
+    filter(basicModule => basicModule.id.length >= 0),
+    map(basicModule => {
+      const importStatments: string[] = [];
+      basicModule.required.forEach(dependencyId => {
+        const mFilePath = basicModule.filePath;
+        const dependencyFilePath = registry.get(dependencyId)?.filePath;
+        if (dependencyFilePath) {
+          const importPath = relativeImportPath(mFilePath, dependencyFilePath);
+          importStatments.push(`import '${importPath}';`);
+        }
+      });
+
+      if (importStatments.length > 0) {
+        const fileD = parser.parse(openFile(basicModule.filePath), {
+          sourceType: 'module'
+        });
+
+        traverse(fileD, {
+          MemberExpression: function(expressionPath) {
+            // Search where the user has declared angular.module
+            if (expressionPath.node.object.type === "Identifier" && expressionPath.node.object.name === "angular") {
+              const line = expressionPath.node.loc?.start.line;
+              if (line) {
+                insertLine(basicModule.filePath).contentSync(importStatments.join('\n')).at(line);
+              }
+            }
+          }
+        })
+      }
+      return openFile(basicModule.filePath);
+    })
+  )
+}
+export { extractBasicModule, extractFilesDependenciesList, extractFolderDependenciesList, importModules };
