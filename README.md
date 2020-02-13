@@ -76,21 +76,29 @@ or
   $./bin/run split --project ../project/angular-app
 ```
 
+_See code: [src/commands/split.ts](https://github.com/boriswaguia/ng-mig/blob/v0.0.0/src/commands/split.ts)_
+
+
 ## `ng-mig dependencies`
 
 Search for all angularjs files, containing an angular.module declaration and extract functions to separated files.
 
 ```
 USAGE
-  $ ng-mig split
+  $ ng-mig dependencies
 
 OPTIONS
   -h, --help       show CLI help
   -p, --project    specify the project root directory to use. If not specified, the current directory is used. We expect the given path to HAVE a src directory.
 
 EXAMPLE
-  $ ng-mig split --project ../project/angular-app
+  $ ng-mig dependencies --project ../project/angular-app
+or
+  $./bin/run dependencies --project ../project/angular-app
 ```
+
+_See code: [src/commands/dependencies.ts](https://github.com/boriswaguia/ng-mig/blob/v0.0.0/src/commands/dependencies.ts)_
+
 
 ## `ng-mig help [COMMAND]`
 
