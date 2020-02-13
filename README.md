@@ -56,7 +56,7 @@ EXAMPLE
   hello world from ./src/hello.ts!
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/boriswaguia/ng-mig/blob/v0.0.0/src/commands/hello.ts)_
+_See code: [src/commands/hello.ts](https://github.com/boriswaguia/ng-mig/blob/master/src/commands/hello.ts)_
 
 ## `ng-mig split`
 
@@ -76,7 +76,7 @@ or
   $./bin/run split --project ../project/angular-app
 ```
 
-_See code: [src/commands/split.ts](https://github.com/boriswaguia/ng-mig/blob/v0.0.0/src/commands/split.ts)_
+_See code: [src/commands/split.ts](https://github.com/boriswaguia/ng-mig/blob/master/src/commands/split.ts)_
 
 
 ## `ng-mig dependencies`
@@ -97,7 +97,7 @@ or
   $./bin/run dependencies --project ../project/angular-app
 ```
 
-_See code: [src/commands/dependencies.ts](https://github.com/boriswaguia/ng-mig/blob/v0.0.0/src/commands/dependencies.ts)_
+_See code: [src/commands/dependencies.ts](https://github.com/boriswaguia/ng-mig/blob/master/src/commands/dependencies.ts)_
 
 
 ## `ng-mig help [COMMAND]`
