@@ -18,4 +18,11 @@ describe('RelativeHelper', () => {
     const path = relativeImportPath(file1, file2);
     expect(path).toBe('./employees/employees');
   });
+
+  test('should create import path using window files', () => {
+    const file1 = 'testdata\\src\\app\\app.js';
+    const file2 = 'testdata\\src\\app\\employees\\employees.js';
+    const path = relativeImportPath(file1, file2);
+    expect(path).toBe('./employees/employees');
+  });
 });

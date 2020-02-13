@@ -12,7 +12,7 @@ const relativeImportPath = (fileOne: string, fileTwo: string) => {
   const path = relativePath(fileOne, fileTwo);
   const paths = path.split('.');
   paths.pop();
-  const extensionRemovedRelativePath = paths.join('.');
+  const extensionRemovedRelativePath = paths.join('.').replace(/\\g/, "/");
   return extensionRemovedRelativePath;
 }
 export { relativePath, relativeImportPath };
