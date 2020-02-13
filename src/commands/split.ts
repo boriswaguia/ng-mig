@@ -18,10 +18,8 @@ export default class Split extends Command {
     })
   };
 
-  // static args = [{name: 'file'}]
-
   async run() {
-    const { args, flags } = this.parse(Split);
+    const { flags } = this.parse(Split);
 
     const project = flags.project || getCurrentDir();
 

@@ -14,10 +14,8 @@ export default class Dependencies extends Command {
     project: flags.string({char: 'p', description: 'root project folder containing sources files in the src/ directory.'}),
   }
 
-  static args = [{name: 'file'}]
-
   async run() {
-    const { args, flags } = this.parse(Dependencies);
+    const { flags } = this.parse(Dependencies);
 
     const project = flags.project || getCurrentDir();
 
