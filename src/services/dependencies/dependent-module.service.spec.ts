@@ -2,7 +2,6 @@ import { deleteTestData, createTestData, mapData } from '../../helpers/test.data
 import { processFolder } from '../process-file.service';
 import { extractBasicModule, extractFilesDependenciesList, importModules, importModulesForFolder } from './dependent-module.service';
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
-import { forkJoin } from 'rxjs';
 
 describe('DependentModuleImport', () => {
   const TEST_NAME = 'DependentModuleImport';
@@ -36,7 +35,7 @@ describe('DependentModuleImport', () => {
   test('build dependency lists of all project modules files', (done) => {
     const files = getSourceFiles(testDir);
     extractFilesDependenciesList(files).subscribe(registry => {
-      expect(registry.size).toBe(5);
+      expect(registry.size).toBe(7);
       done();
     })
   });

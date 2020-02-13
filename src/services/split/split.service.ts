@@ -1,5 +1,5 @@
 import { TraverseResultExpressionStatement } from '../../vendors/helpers/traverse-result';
-import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement, ClassDeclaration } from '@babel/types';
+import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement, ClassDeclaration, StringLiteral } from '@babel/types';
 import traverse, { NodePath } from '@babel/traverse';
 import template from '@babel/template';
 import generate from '@babel/generator';
@@ -62,12 +62,42 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
       const callerName = callee.property['name']; // can be .config(..) .controller('xx',..), .constanst
       const argument = expression.arguments.length === 1 ? expression.arguments[0] : expression.arguments[1];
 
-      let argumentId = ""
+      let argumentId:any;
+
       if(argument.type === "StringLiteral" && callerName !== "constant") {
         argumentId = argument.value;
       } else if(argument.type === "Identifier") {
         argumentId = argument.name;
+      } else if (argument.type === "ObjectExpression") {
+        // Use the first argument as identifier in case of think like this : .component('apFooter', {key: val, key: val})
+        const objectDeclaration = {...argument};
+        argumentId = expression.arguments.length === 2 ? (expression.arguments[0] as StringLiteral).value : undefined;
+
+        // Refactor code and create a new variable declaration
+        // i.e:
+        // .component('apFooter', {key: val, key: val})
+        const variableDeclaration = template(`const %%argumentId%% = %%objectDeclaration%%;`);
+        traverse(file, {
+          BlockStatement: function(p) {
+            if(p.parent.type === "FunctionExpression") {
+              const statement = variableDeclaration({
+                argumentId,
+                objectDeclaration: objectDeclaration
+              });
+              p.pushContainer("body", statement);
+            }
+          }
+        });
+        const {loc, start, end} = argument;
+        const a : Identifier = {type: "Identifier", name: argumentId, loc, start, decorators:null, end, optional: false, typeAnnotation: null, leadingComments: null, innerComments: null, trailingComments: null};
+        // update the argument params and use an identifier instead of objectexpression
+
+        // (final result should be like this)
+        // const apFooter = {key: val, key: val}
+        // .component('apFooter', apFooter) // note that we
+        expression.arguments[1] = a;
       }
+
       console.log(`${callerName} - ${argumentId}`);
 
       if (argumentId) {
@@ -125,7 +155,7 @@ const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAc
   console.log('newFileModule', newFile);
   writeFileSync(newFile, controllerContent);
 }
-const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, filePath: FilePath): void => {
+const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, filePath: FilePath): number => {
   const {file, modulePath} = traverseResult
 
   const node = modulePath.node;
@@ -143,7 +173,7 @@ const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, fil
   export { %%contentId%% };
 
   `;
-
+  let numberOfImported = 0;
   if (node.expression.type === "CallExpression") {
     const expression: CallExpression = node.expression;
     const importAccumulator = new Map<string, string>();
@@ -153,8 +183,10 @@ const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, fil
       console.log('importAccumulator', importAccumulator);
       createNewModule(filePath, node, importAccumulator);
       renameSync(filePath, filePath+'.processed');
+      numberOfImported = importAccumulator.size;
     }
   }
+  return numberOfImported;
 };
 
 
