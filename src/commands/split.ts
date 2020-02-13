@@ -5,7 +5,7 @@ import { processFiles } from "../services/process-file.service";
 
 export default class Split extends Command {
   static description =
-    "Search for all angularjs files, containing an angular.module declaration and extract functions to separated fifles";
+    "Search for all angularjs files, containing an angular.module declaration and extract functions to separated files";
 
   static examples = [`$ ng-mig split $project_dir`];
 

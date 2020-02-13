@@ -16,8 +16,9 @@ Tool to help migrate your AngularJs to Angular
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g ng-mig
-$ ng-mig COMMAND
+$ git clone https://github.com/boriswaguia/ng-mig.git && cd ng-mig
+$ npm install
+$ ./bin/run COMMAND
 running command...
 $ ng-mig (-v|--version|version)
 ng-mig/0.0.0 darwin-x64 node-v10.15.3
@@ -29,8 +30,13 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`ng-mig hello [FILE]`](#ng-mig-hello-file)
-* [`ng-mig help [COMMAND]`](#ng-mig-help-command)
+- [ng-mig](#ng-mig)
+- [Usage](#usage)
+- [Commands](#commands)
+  - [`ng-mig hello [FILE]`](#ng-mig-hello-file)
+  - [`ng-mig split`](#ng-mig-split)
+  - [`ng-mig dependencies`](#ng-mig-dependencies)
+  - [`ng-mig help [COMMAND]`](#ng-mig-help-command)
 
 ## `ng-mig hello [FILE]`
 
@@ -51,6 +57,40 @@ EXAMPLE
 ```
 
 _See code: [src/commands/hello.ts](https://github.com/boriswaguia/ng-mig/blob/v0.0.0/src/commands/hello.ts)_
+
+## `ng-mig split`
+
+Search for all angularjs files, containing an angular.module declaration and extract functions to separated files.
+
+```
+USAGE
+  $ ng-mig split
+
+OPTIONS
+  -h, --help       show CLI help
+  -p, --project    specify the project root directory to use. If not specified, the current directory is used. We expect the given path to HAVE a src directory.
+
+EXAMPLE
+  $ ng-mig split --project ../project/angular-app
+or
+  $./bin/run split --project ../project/angular-app
+```
+
+## `ng-mig dependencies`
+
+Search for all angularjs files, containing an angular.module declaration and extract functions to separated files.
+
+```
+USAGE
+  $ ng-mig split
+
+OPTIONS
+  -h, --help       show CLI help
+  -p, --project    specify the project root directory to use. If not specified, the current directory is used. We expect the given path to HAVE a src directory.
+
+EXAMPLE
+  $ ng-mig split --project ../project/angular-app
+```
 
 ## `ng-mig help [COMMAND]`
 
