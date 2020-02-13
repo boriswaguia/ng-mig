@@ -1,6 +1,6 @@
 import {Command, flags} from '@oclif/command'
 import { getCurrentDir, dirExist } from '../vendors/helpers/directory.helper'
-import { importModulesForFolder } from '../services/modules/dependent-module.service'
+import { importModulesForFolder } from '../services/dependencies/dependent-module.service'
 
 export default class Dependencies extends Command {
   static description = 'Scan all module files and fix missing required angular modules imports'

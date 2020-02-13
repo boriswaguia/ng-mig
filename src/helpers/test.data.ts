@@ -1,9 +1,8 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import * as fse from 'fs-extra';
 import { existsSync, copySync, mkdirSync } from '../vendors/helpers/file.helper';
-import { BasicModule } from '../services/modules/dependent-module.service';
+import { BasicModule } from '../services/dependencies/dependent-module.service';
 const rimraf = require('rimraf');
 
 
