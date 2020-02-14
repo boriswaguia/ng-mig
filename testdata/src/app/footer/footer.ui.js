@@ -6,4 +6,11 @@
         .component('akFooter', {
             templateUrl: 'app/footer/footer.html'
         });
+
+    function testFunction() {
+      const b = function() {
+        var akFooter = 'adbs';
+        return {akFooter};
+      }
+    }
 })();

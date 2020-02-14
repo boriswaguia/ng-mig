@@ -4,7 +4,8 @@ import traverse, { NodePath } from '@babel/traverse';
 import template from '@babel/template';
 import generate from '@babel/generator';
 import { Node } from '@babel/types';
-import { File, Identifier } from '@babel/types';
+import { File, Identifier, matchesPattern } from '@babel/types';
+
 
 import { dirName, fileName, writeFileSync, renameSync } from '../../vendors/helpers/file.helper';
 import { FilePath } from './module.type';
@@ -32,10 +33,9 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
 function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
   traverse(file, {
     VariableDeclaration: function(xPath) {
-      const declaration = xPath.node.declarations.filter(x => {
-        const result = (x.id as Identifier).name === contentId && xPath.parentPath.parentPath.get("type") === "FunctionExpression";
-        return result;
-      });
+      const parentStartLine = xPath.parentPath.node.loc?.start.line;
+      // test if name match, and is direct child of the main programm.
+      const declaration = xPath.node.declarations.filter(x => (x.id as Identifier).name === contentId && parentStartLine === 1);
       if (declaration.length > 0) {
         writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
@@ -79,26 +79,35 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
         // Refactor code and create a new variable declaration
         // i.e:
         // .component('apFooter', {key: val, key: val})
-        const variableDeclaration = template(`const %%argumentId%% = %%objectDeclaration%%;`);
-        traverse(file, {
-          BlockStatement: function(p) {
-            if(p.parent.type === "FunctionExpression") {
-              const statement = variableDeclaration({
-                argumentId,
-                objectDeclaration: objectDeclaration
-              });
-              p.pushContainer("body", statement);
-            }
-          }
-        });
-        const {loc, start, end} = argument;
-        const a : Identifier = {type: "Identifier", name: argumentId, loc, start, decorators:null, end, optional: false, typeAnnotation: null, leadingComments: null, innerComments: null, trailingComments: null};
-        // update the argument params and use an identifier instead of objectexpression
-
         // (final result should be like this)
         // const apFooter = {key: val, key: val}
-        // .component('apFooter', apFooter) // note that we
+        // update the argument params and use an identifier instead of objectexpression
+        // .component('apFooter', apFooter)
+        const variableDeclaration = template(`const %%argumentId%% = %%objectDeclaration%%;`);
+        const {loc, start, end} = argument;
+        const a : Identifier = {type: "Identifier", name: argumentId, loc, start, decorators:null, end, optional: false, typeAnnotation: null, leadingComments: null, innerComments: null, trailingComments: null};
         expression.arguments[1] = a;
+        traverse(file, {
+          ExpressionStatement: function(expressionPath) {
+
+            traverse(
+              expressionPath.node,
+              {
+                noScope: true,
+                enter(path2: NodePath) {
+                  const angularDeclFound = matchesPattern(path2.node, "angular", true);
+                  if (angularDeclFound && expressionPath.node.loc && expressionPath.node.loc.start.line > 1) {
+                    const statement = variableDeclaration({
+                      argumentId,
+                      objectDeclaration: objectDeclaration
+                    });
+                    expressionPath.insertAfter(statement);
+                  }
+                }
+              }
+            );
+          }
+        });
       }
 
       console.log(`${callerName} - ${argumentId}`);

@@ -19,4 +19,6 @@ const copySync = (src: string, dest: string) => fse.copySync(src, dest);
 
 const mkdirSync = (dirPath: string) => fse.mkdirSync(dirPath, { recursive: true});
 
-export {openFile, dirName, fileName, writeFileSync, renameSync, existsSync, copySync, mkdirSync};
+const pathExistsSync = (path: string) => fse.pathExistsSync(path);
+
+export {openFile, dirName, fileName, writeFileSync, renameSync, existsSync, copySync, mkdirSync, pathExistsSync};
