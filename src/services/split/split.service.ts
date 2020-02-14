@@ -68,10 +68,10 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
         argumentId = argument.value;
       } else if(argument.type === "Identifier") {
         argumentId = argument.name;
-      } else if (argument.type === "ObjectExpression") {
+      } else if (argument.type === "ObjectExpression" || argument.type === "FunctionExpression") {
         // Use the first argument as identifier in case of think like this : .component('apFooter', {key: val, key: val})
-        const objectDeclaration = {...argument};
         argumentId = expression.arguments.length === 2 ? (expression.arguments[0] as StringLiteral).value : undefined;
+        const objectDeclaration = {...argument};
 
         // Refactor code and create a new variable declaration
         // i.e:
