@@ -18,24 +18,34 @@ describe("ModuleSplitService", () => {
   });
 
 
-  test("should extract four files with from a given module", done => {
-    const filePath = testDir+'/src/app/employees/employees.ui.js'
-    extractModuleDeclaration(openFile(filePath)).subscribe(r => {
-      const expectedImportedFiles = 3;
-      const numberOfImported = splitDeclaration(r, filePath);
-      expect(numberOfImported).toBe(expectedImportedFiles);
-      done();
-    });
-  });
+  // test("should extract four files with from a given module", done => {
+  //   const filePath = testDir+'/src/app/employees/employees.ui.js'
+  //   extractModuleDeclaration(openFile(filePath)).subscribe(r => {
+  //     const expectedImportedFiles = 3;
+  //     const numberOfImported = splitDeclaration(r, filePath);
+  //     expect(numberOfImported).toBe(expectedImportedFiles);
+  //     done();
+  //   });
+  // });
 
-  test("should extract four files with from a given module", done => {
-    const filePath = testDir+'/src/app/footer/footer.ui.js'
+  // test("should extract module with objectExpression as parameter argument", done => {
+  //   const filePath = testDir+'/src/app/footer/footer.ui.js'
+  //   extractModuleDeclaration(openFile(filePath)).subscribe(r => {
+  //     const numberOfImported = splitDeclaration(r, filePath);
+  //     expect(numberOfImported).toBe(1);
+  //     done();
+  //   });
+  // });
+
+  test("should correctly extract function having a variable declaration with the same name as the function", done => {
+    const filePath = testDir+'/src/app/special-cases/hasIdenticVarAndFunctionIdentifier.js'
     extractModuleDeclaration(openFile(filePath)).subscribe(r => {
       const numberOfImported = splitDeclaration(r, filePath);
       expect(numberOfImported).toBe(1);
       done();
     });
   });
+
 
   afterEach(() => {
     // deleteTestData(TEST_NAME);

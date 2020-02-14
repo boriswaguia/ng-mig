@@ -32,7 +32,10 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
 function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
   traverse(file, {
     VariableDeclaration: function(xPath) {
-      const declaration = xPath.node.declarations.filter(x => (x.id as Identifier).name === contentId);
+      const declaration = xPath.node.declarations.filter(x => {
+        const result = (x.id as Identifier).name === contentId && xPath.parentPath.parentPath.get("type") === "FunctionExpression";
+        return result;
+      });
       if (declaration.length > 0) {
         writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
