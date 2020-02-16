@@ -13,7 +13,8 @@
       return {
         arg
       }
-    });
+    })
+    .factory('UserService', UserService);
 
   function unusedFunction(arg) {
     return this;
@@ -35,4 +36,10 @@
         }
     }
   }
+  class UserService {
+    constructor(name) {
+      this.user = new User();
+    }
+  }
+  class User {}
 })();

@@ -1,21 +1,43 @@
-import { TraverseResultExpressionStatement } from '../../vendors/helpers/traverse-result';
-import { CallExpression, MemberExpression, program, Statement, VariableDeclaration, FunctionDeclaration, ExpressionStatement, ClassDeclaration, StringLiteral } from '@babel/types';
-import traverse, { NodePath } from '@babel/traverse';
-import template from '@babel/template';
-import generate from '@babel/generator';
-import { Node } from '@babel/types';
-import { File, Identifier, matchesPattern } from '@babel/types';
+import { TraverseResultExpressionStatement } from "../../vendors/helpers/traverse-result";
+import {
+  CallExpression,
+  MemberExpression,
+  program,
+  Statement,
+  VariableDeclaration,
+  FunctionDeclaration,
+  ExpressionStatement,
+  ClassDeclaration,
+  StringLiteral
+} from "@babel/types";
+import traverse, { NodePath } from "@babel/traverse";
+import template from "@babel/template";
+import generate from "@babel/generator";
+import { Node } from "@babel/types";
+import { File, Identifier, matchesPattern } from "@babel/types";
 
+import {
+  dirName,
+  fileName,
+  writeFileSync,
+  renameSync
+} from "../../vendors/helpers/file.helper";
+import { FilePath } from "./module.type";
 
-import { dirName, fileName, writeFileSync, renameSync } from '../../vendors/helpers/file.helper';
-import { FilePath } from './module.type';
+const getFileName = (
+  currentDir: string,
+  contentId: string,
+  contentName: string
+) => `${currentDir}${contentId.toLowerCase()}.${contentName}.js`;
 
-
-const getFileName = (currentDir: string, contentId: string, contentName: string) => `${currentDir}${contentId.toLowerCase()}.${contentName}.js`;
-
-function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclaration | ClassDeclaration>, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
-
-  const code = generate((xPath.node as Node)).code
+function writeContentToFile(
+  xPath: NodePath<VariableDeclaration | FunctionDeclaration | ClassDeclaration>,
+  sourceTemplate: any,
+  contentId: string,
+  contentName: string,
+  currentDir: string
+) {
+  const code = generate(xPath.node as Node).code;
 
   const result = sourceTemplate({
     content: code,
@@ -24,58 +46,101 @@ function writeContentToFile(xPath: NodePath<VariableDeclaration | FunctionDeclar
 
   const p = program(result);
   const controllerContent = generate(p).code;
-  currentDir = currentDir ? currentDir + '/': '';
+  currentDir = currentDir ? currentDir + "/" : "";
   const newFile = getFileName(currentDir, contentId, contentName);
-  console.log('newFile', newFile);
+  console.log("newFile", newFile);
   writeFileSync(newFile, controllerContent);
 }
 
-function extractContentToFile(file: File, sourceTemplate: any, contentId: string, contentName: string, currentDir: string) {
+function extractContentToFile(
+  file: File,
+  sourceTemplate: any,
+  contentId: string,
+  contentName: string,
+  currentDir: string
+) {
   traverse(file, {
     VariableDeclaration: function(xPath) {
       const parentStartLine = xPath.parentPath.node.loc?.start.line;
       // test if name match, and is direct child of the main programm.
-      const declaration = xPath.node.declarations.filter(x => (x.id as Identifier).name === contentId && parentStartLine === 1);
+      const declaration = xPath.node.declarations.filter(
+        x => (x.id as Identifier).name === contentId && parentStartLine === 1
+      );
       if (declaration.length > 0) {
-        writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
+        writeContentToFile(
+          xPath,
+          sourceTemplate,
+          contentId,
+          contentName,
+          currentDir
+        );
       }
     },
     FunctionDeclaration: function(xPath) {
       // test if name match, and is direct child of the main programm.
-      if((xPath.node.id?.name === contentId) && (xPath.parentPath.node.loc?.start.line === 1)) {
-        writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
+      if (
+        xPath.node.id?.name === contentId &&
+        xPath.parentPath.node.loc?.start.line === 1
+      ) {
+        writeContentToFile(
+          xPath,
+          sourceTemplate,
+          contentId,
+          contentName,
+          currentDir
+        );
       }
     },
     ClassDeclaration: function(xPath) {
-      if(xPath.node.id?.name === contentId) {
-        writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
+      if (xPath.node.id?.name === contentId) {
+        writeContentToFile(
+          xPath,
+          sourceTemplate,
+          contentId,
+          contentName,
+          currentDir
+        );
       }
     }
-  })
+  });
 }
 
-function extract(expression: CallExpression, file: File, fileTemplate: string, currentDir: string, importAccumulator: Map<string, string>) {
-
+function extract(
+  expression: CallExpression,
+  file: File,
+  fileTemplate: string,
+  currentDir: string,
+  importAccumulator: Map<string, string>
+) {
   const sourceTemplate = template(fileTemplate, {
     allowImportExportEverywhere: true
   });
 
   if (expression.arguments && expression.arguments.length > 0) {
-    if(expression.callee.type == "MemberExpression") {
+    if (expression.callee.type == "MemberExpression") {
       const callee: MemberExpression = expression.callee;
-      const callerName = callee.property['name']; // can be .config(..) .controller('xx',..), .constanst
-      const argument = expression.arguments.length === 1 ? expression.arguments[0] : expression.arguments[1];
+      const callerName = callee.property["name"]; // can be .config(..) .controller('xx',..), .constanst
+      const argument =
+        expression.arguments.length === 1
+          ? expression.arguments[0]
+          : expression.arguments[1];
 
-      let argumentId:any;
+      let argumentId: any;
 
-      if(argument.type === "StringLiteral" && callerName !== "constant") {
+      if (argument.type === "StringLiteral" && callerName !== "constant") {
         argumentId = argument.value;
-      } else if(argument.type === "Identifier") {
+      } else if (argument.type === "Identifier") {
         argumentId = argument.name;
-      } else if (argument.type === "ObjectExpression" || argument.type === "FunctionExpression") {
+      } else if (
+        argument.type === "ObjectExpression" ||
+        argument.type === "FunctionExpression"
+      ) {
         // Use the first argument as identifier in case of think like this : .component('apFooter', {key: val, key: val})
-        argumentId = expression.arguments.length === 2 ? (expression.arguments[0] as StringLiteral).value : undefined;
-        const objectDeclaration = {...argument};
+        argumentId =
+          expression.arguments.length === 2
+            ? (expression.arguments[0] as StringLiteral).value
+            : undefined;
+        const objectDeclaration = { ...argument };
 
         // Refactor code and create a new variable declaration
         // i.e:
@@ -84,29 +149,47 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
         // const apFooter = {key: val, key: val}
         // update the argument params and use an identifier instead of objectexpression
         // .component('apFooter', apFooter)
-        const variableDeclaration = template(`const %%argumentId%% = %%objectDeclaration%%;`);
-        const {loc, start, end} = argument;
-        const a : Identifier = {type: "Identifier", name: argumentId, loc, start, decorators:null, end, optional: false, typeAnnotation: null, leadingComments: null, innerComments: null, trailingComments: null};
+        const variableDeclaration = template(
+          `const %%argumentId%% = %%objectDeclaration%%;`
+        );
+        const { loc, start, end } = argument;
+        const a: Identifier = {
+          type: "Identifier",
+          name: argumentId,
+          loc,
+          start,
+          decorators: null,
+          end,
+          optional: false,
+          typeAnnotation: null,
+          leadingComments: null,
+          innerComments: null,
+          trailingComments: null
+        };
         expression.arguments[1] = a;
         traverse(file, {
           ExpressionStatement: function(expressionPath) {
-
-            traverse(
-              expressionPath.node,
-              {
-                noScope: true,
-                enter(path2: NodePath) {
-                  const angularDeclFound = matchesPattern(path2.node, "angular", true);
-                  if (angularDeclFound && expressionPath.node.loc && expressionPath.node.loc.start.line > 1) {
-                    const statement = variableDeclaration({
-                      argumentId,
-                      objectDeclaration: objectDeclaration
-                    });
-                    expressionPath.insertAfter(statement);
-                  }
+            traverse(expressionPath.node, {
+              noScope: true,
+              enter(path2: NodePath) {
+                const angularDeclFound = matchesPattern(
+                  path2.node,
+                  "angular",
+                  true
+                );
+                if (
+                  angularDeclFound &&
+                  expressionPath.node.loc &&
+                  expressionPath.node.loc.start.line > 1
+                ) {
+                  const statement = variableDeclaration({
+                    argumentId,
+                    objectDeclaration: objectDeclaration
+                  });
+                  expressionPath.insertAfter(statement);
                 }
               }
-            );
+            });
           }
         });
       }
@@ -115,55 +198,80 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
 
       if (argumentId) {
         importAccumulator.set(argumentId, callerName);
-        extractContentToFile(file, sourceTemplate, argumentId, callerName, currentDir);
+        extractContentToFile(
+          file,
+          sourceTemplate,
+          argumentId,
+          callerName,
+          currentDir
+        );
       }
       if (callee.object.type === "CallExpression") {
-        extract(callee.object, file, fileTemplate, currentDir, importAccumulator);
+        extract(
+          callee.object,
+          file,
+          fileTemplate,
+          currentDir,
+          importAccumulator
+        );
       }
     }
   } else {
-    if(expression.callee.type === "MemberExpression" && expression.callee.object.type === "CallExpression") {
-      extract(expression.callee.object, file, fileTemplate, currentDir, importAccumulator);
+    if (
+      expression.callee.type === "MemberExpression" &&
+      expression.callee.object.type === "CallExpression"
+    ) {
+      extract(
+        expression.callee.object,
+        file,
+        fileTemplate,
+        currentDir,
+        importAccumulator
+      );
     }
   }
 }
 
 // const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAccumulator: Map<string, string>) => {
-  const createNewModule = (filePath: FilePath, node: Statement[], importAccumulator: Map<string, string>) => {
+const createNewModule = (
+  filePath: FilePath,
+  node: Statement[],
+  importAccumulator: Map<string, string>
+) => {
   const newModuleTemplate = `
-  'use strict';
+    'use strict';
 
-  import * as angular from 'angular'
-
-
-  %%moduleImports%%
+    import * as angular from 'angular'
 
 
-  %%moduleDeclaration%%
+    %%moduleImports%%
 
 
-  `;
+    %%moduleDeclaration%%
+
+
+    `;
 
   const moduleTemplate = template(newModuleTemplate, {
     allowImportExportEverywhere: true
   });
 
   let moduleImports: string = ``;
- importAccumulator.forEach((value, key) => {
-   const importS = `import { ${key} } from './${key.toLowerCase()}.${value}'; \n`;
-   moduleImports = moduleImports + importS;
- });
+  importAccumulator.forEach((value, key) => {
+    const importS = `import { ${key} } from './${key.toLowerCase()}.${value}'; \n`;
+    moduleImports = moduleImports + importS;
+  });
 
- console.log('import', moduleImports);
+  console.log("import", moduleImports);
 
- let body = ``;
+  let body = ``;
 
- node.forEach(x => {
-   const code = generate(x).code
-   body = body + code + '\n\n';
- });
+  node.forEach(x => {
+    const code = generate(x).code;
+    body = body + code + "\n\n";
+  });
 
- const result = moduleTemplate({
+  const result = moduleTemplate({
     moduleImports,
     moduleDeclaration: body
   }) as Statement[];
@@ -171,26 +279,40 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
 
   const controllerContent = generate(p).code;
 
-  const name = fileName(filePath).replace('.js', '');
-  const newFile = getFileName(dirName(filePath)+'/', name, 'module');
-  console.log('newFileModule', newFile);
+  const name = fileName(filePath).replace(".js", "");
+  const newFile = getFileName(dirName(filePath) + "/", name, "module");
+  console.log("newFileModule", newFile);
   writeFileSync(newFile, controllerContent);
-}
+};
 
-
-const removeExportedStatements = (file: File, importAccumulator: Map<string, string>) => {
+const removeExportedStatements = (
+  file: File,
+  importAccumulator: Map<string, string>
+) => {
   let result: NodePath<Statement>[] = [];
   traverse(file, {
     FunctionExpression: function(xPath) {
       if (xPath.node.start === 1) {
         const statementBody = xPath.get("body").get("body");
         result = statementBody.filter(statement => {
-          if (statement.isFunctionDeclaration() && importAccumulator.get(statement.node.id?.name) !== undefined) {
+          if (
+            statement.isFunctionDeclaration() &&
+            importAccumulator.get(statement.node.id?.name) !== undefined
+          ) {
             return false;
-          } else if (statement.isVariableDeclaration() &&
-            statement.node.declarations.filter(d => importAccumulator.has((d.id as Identifier).name)).length >= 1) {
+          } else if (
+            statement.isVariableDeclaration() &&
+            statement.node.declarations.filter(d =>
+              importAccumulator.has((d.id as Identifier).name)
+            ).length >= 1
+          ) {
             return false;
-          } else {
+          } else if (statement.isClassDeclaration() &&
+          importAccumulator.get((statement.node.id as Identifier).name) !== undefined
+          ) {
+            return false;
+          }
+          else {
             return true;
           }
         });
@@ -198,13 +320,15 @@ const removeExportedStatements = (file: File, importAccumulator: Map<string, str
     }
   });
   return result;
-}
+};
 
-const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, filePath: FilePath): number => {
-  const {file, modulePath} = traverseResult
+const splitDeclaration = (
+  traverseResult: TraverseResultExpressionStatement,
+  filePath: FilePath
+): number => {
+  const { file, modulePath } = traverseResult;
 
   const node = modulePath.node;
-
 
   const fileTemplate = `
   'use strict';
@@ -222,19 +346,27 @@ const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, fil
   if (node.expression.type === "CallExpression") {
     const expression: CallExpression = node.expression;
     const importAccumulator = new Map<string, string>();
-    extract(expression, file, fileTemplate, dirName(filePath), importAccumulator);
+    extract(
+      expression,
+      file,
+      fileTemplate,
+      dirName(filePath),
+      importAccumulator
+    );
 
     if (importAccumulator.size > 0) {
-      const remainingStatements = removeExportedStatements(file, importAccumulator);
-      console.log('importAccumulator', importAccumulator);
+      const remainingStatements = removeExportedStatements(
+        file,
+        importAccumulator
+      );
+      console.log("importAccumulator", importAccumulator);
       const nodes = remainingStatements.map(x => x.node);
       createNewModule(filePath, nodes, importAccumulator);
-      renameSync(filePath, filePath+'.processed');
+      renameSync(filePath, filePath + ".processed");
       numberOfImported = importAccumulator.size;
     }
   }
   return numberOfImported;
 };
 
-
-export {splitDeclaration};
+export { splitDeclaration };
