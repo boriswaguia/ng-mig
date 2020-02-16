@@ -41,12 +41,14 @@ function extractContentToFile(file: File, sourceTemplate: any, contentId: string
       }
     },
     FunctionDeclaration: function(xPath) {
-      if(xPath.node.id?.name === contentId) {
+      // test if name match, and is direct child of the main programm.
+      if((xPath.node.id?.name === contentId) && (xPath.parentPath.node.loc?.start.line === 1)) {
         writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
     },
     ClassDeclaration: function(xPath) {
-      if(xPath.node.id?.name === contentId) {
+      // test if name match, and is direct child of the main programm.
+      if((xPath.node.id?.name === contentId) && (xPath.parentPath.node.loc?.start.line === 1)) {
         writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
     }
