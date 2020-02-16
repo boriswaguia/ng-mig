@@ -41,7 +41,7 @@ describe("ModuleSplitService", () => {
   });
 
   test("should correctly extract function having a variable declaration with the same name as the function", done => {
-    const filePath = testDir+'/src/app/special-cases/hasIdenticVarAndFunctionIdentifier.js';
+    const filePath = testDir+'/src/app/special-cases/has-identic-var-and-function-identifier.js';
     extractModuleDeclaration(openFile(filePath)).subscribe(r => {
       const numberOfImported = splitDeclaration(r, filePath);
       expect(numberOfImported).toBe(1);
@@ -51,7 +51,7 @@ describe("ModuleSplitService", () => {
   });
 
   test("should correctly extract function witch immediately return object", (done) => {
-    const filePath = testDir+'/src/app/special-cases/moduleHasReturnObject.js';
+    const filePath = testDir+'/src/app/special-cases/module-has-return-object.js';
 
       extractModuleDeclaration(openFile(filePath)).subscribe(r => {
         const numberOfImported = splitDeclaration(r, filePath);
@@ -62,7 +62,7 @@ describe("ModuleSplitService", () => {
     });
 
     test("should correctly extract function expression in module argument immediately returning object", (done) => {
-      const filePath = testDir+'/src/app/special-cases/funcArgImmediateReturnObjs.js';
+      const filePath = testDir+'/src/app/special-cases/func-arg-immediate-return-objs.js';
       const expectedFile = testDir+'/src/app/special-cases/funcargimmediatereturnobjsreturn.directive.js'
       extractModuleDeclaration(openFile(filePath)).subscribe(r => {
         const numberOfImported = splitDeclaration(r, filePath);
