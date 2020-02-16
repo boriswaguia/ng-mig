@@ -47,8 +47,7 @@ function extractContentToFile(file: File, sourceTemplate: any, contentId: string
       }
     },
     ClassDeclaration: function(xPath) {
-      // test if name match, and is direct child of the main programm.
-      if((xPath.node.id?.name === contentId) && (xPath.parentPath.node.loc?.start.line === 1)) {
+      if(xPath.node.id?.name === contentId) {
         writeContentToFile(xPath, sourceTemplate, contentId, contentName, currentDir);
       }
     }
@@ -129,7 +128,8 @@ function extract(expression: CallExpression, file: File, fileTemplate: string, c
   }
 }
 
-const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAccumulator: Map<string, string>) => {
+// const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAccumulator: Map<string, string>) => {
+  const createNewModule = (filePath: FilePath, node: Statement[], importAccumulator: Map<string, string>) => {
   const newModuleTemplate = `
   'use strict';
 
@@ -156,9 +156,16 @@ const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAc
 
  console.log('import', moduleImports);
 
+ let body = ``;
+
+ node.forEach(x => {
+   const code = generate(x).code
+   body = body + code + '\n\n';
+ });
+
  const result = moduleTemplate({
     moduleImports,
-    moduleDeclaration: generate(node).code
+    moduleDeclaration: body
   }) as Statement[];
   const p = program(result);
 
@@ -169,6 +176,30 @@ const createNewModule = (filePath: FilePath, node: ExpressionStatement, importAc
   console.log('newFileModule', newFile);
   writeFileSync(newFile, controllerContent);
 }
+
+
+const removeExportedStatements = (file: File, importAccumulator: Map<string, string>) => {
+  let result: NodePath<Statement>[] = [];
+  traverse(file, {
+    FunctionExpression: function(xPath) {
+      if (xPath.node.start === 1) {
+        const statementBody = xPath.get("body").get("body");
+        result = statementBody.filter(statement => {
+          if (statement.isFunctionDeclaration() && importAccumulator.get(statement.node.id?.name) !== undefined) {
+            return false;
+          } else if (statement.isVariableDeclaration() &&
+            statement.node.declarations.filter(d => importAccumulator.has((d.id as Identifier).name)).length >= 1) {
+            return false;
+          } else {
+            return true;
+          }
+        });
+      }
+    }
+  });
+  return result;
+}
+
 const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, filePath: FilePath): number => {
   const {file, modulePath} = traverseResult
 
@@ -194,8 +225,10 @@ const splitDeclaration = (traverseResult: TraverseResultExpressionStatement, fil
     extract(expression, file, fileTemplate, dirName(filePath), importAccumulator);
 
     if (importAccumulator.size > 0) {
+      const remainingStatements = removeExportedStatements(file, importAccumulator);
       console.log('importAccumulator', importAccumulator);
-      createNewModule(filePath, node, importAccumulator);
+      const nodes = remainingStatements.map(x => x.node);
+      createNewModule(filePath, nodes, importAccumulator);
       renameSync(filePath, filePath+'.processed');
       numberOfImported = importAccumulator.size;
     }
