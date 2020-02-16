@@ -290,35 +290,47 @@ const removeExportedStatements = (
   importAccumulator: Map<string, string>
 ) => {
   let result: NodePath<Statement>[] = [];
+  const filterStatemments = (statementBody: NodePath<Statement>[]) => {
+    const result = statementBody.filter(statement => {
+      if (
+        statement.isFunctionDeclaration() &&
+        importAccumulator.get(statement.node.id?.name) !== undefined
+      ) {
+        return false;
+      } else if (
+        statement.isVariableDeclaration() &&
+        statement.node.declarations.filter(d =>
+          importAccumulator.has((d.id as Identifier).name)
+        ).length >= 1
+      ) {
+        return false;
+      } else if (statement.isClassDeclaration() &&
+      importAccumulator.get((statement.node.id as Identifier).name) !== undefined
+      ) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    });
+    return result;
+  }
+
   traverse(file, {
     FunctionExpression: function(xPath) {
       if (xPath.node.start === 1) {
         const statementBody = xPath.get("body").get("body");
-        result = statementBody.filter(statement => {
-          if (
-            statement.isFunctionDeclaration() &&
-            importAccumulator.get(statement.node.id?.name) !== undefined
-          ) {
-            return false;
-          } else if (
-            statement.isVariableDeclaration() &&
-            statement.node.declarations.filter(d =>
-              importAccumulator.has((d.id as Identifier).name)
-            ).length >= 1
-          ) {
-            return false;
-          } else if (statement.isClassDeclaration() &&
-          importAccumulator.get((statement.node.id as Identifier).name) !== undefined
-          ) {
-            return false;
-          }
-          else {
-            return true;
-          }
-        });
+        result = filterStatemments(statementBody);
+      }
+    },
+    ArrowFunctionExpression: function(xPath) {
+      if (xPath.node.start === 1) {
+        const statementBody = (xPath.get("body").get("body") as NodePath<Statement>[]);
+        result = filterStatemments(statementBody);
       }
     }
   });
+
   return result;
 };
 
