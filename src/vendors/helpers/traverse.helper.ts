@@ -3,6 +3,7 @@ import * as parser from "@babel/parser";
 import traverse, { NodePath } from "@babel/traverse";
 import { matchesPattern, Identifier } from '@babel/types';
 import { TraverseResultExpressionStatement, TraverseResultCallExpression } from './traverse-result';
+import { parseSourceTypeModule } from './code-parser.helper';
 
 
 const findModule = (source: string, modulePattern: string): Observable<TraverseResultExpressionStatement> => {
@@ -36,9 +37,7 @@ const findModule = (source: string, modulePattern: string): Observable<TraverseR
 
 const findCallExpression = (source: string, calleeId: string): Observable<TraverseResultCallExpression> => {
   return Observable.create((observer: Observer<TraverseResultCallExpression>) => {
-    const file = parser.parse(source, {
-      sourceType: 'module'
-    });
+    const file = parseSourceTypeModule(source);
     traverse(file, {
       CallExpression: function(modulePath) {
         const callee = modulePath.node.callee;

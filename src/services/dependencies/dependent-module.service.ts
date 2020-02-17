@@ -8,6 +8,7 @@ import traverse from "@babel/traverse";
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 import { relativeImportPath } from '../../vendors/helpers/relative.helper';
 import * as parser from "@babel/parser";
+import { parseFileSourceTypeModule } from '../../vendors/helpers/code-parser.helper';
 const insertLine = require('insert-line');
 
 export interface BasicModule {
@@ -78,9 +79,7 @@ const importModules = (filePath: FilePath, registry: Map<string, BasicModule>): 
       });
 
       if (importStatments.length > 0) {
-        const fileD = parser.parse(openFile(basicModule.filePath), {
-          sourceType: 'module'
-        });
+        const fileD = parseFileSourceTypeModule(filePath);
 
         traverse(fileD, {
           MemberExpression: function(expressionPath) {
