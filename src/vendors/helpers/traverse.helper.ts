@@ -6,11 +6,11 @@ import { TraverseResultExpressionStatement, TraverseResultCallExpression } from 
 import { parseSourceTypeModule } from './code-parser.helper';
 
 
-const findModule = (source: string, modulePattern: string): Observable<TraverseResultExpressionStatement> => {
+const findModule = (source: string, modulePattern: string, sourceTypeModule = false): Observable<TraverseResultExpressionStatement> => {
 
   return Observable.create((observer: Observer<TraverseResultExpressionStatement>) => {
 
-    const file = parser.parse(source);
+    const file = sourceTypeModule ? parseSourceTypeModule(source): parser.parse(source);
 
     traverse(file, {
       ExpressionStatement: function(modulePath) {

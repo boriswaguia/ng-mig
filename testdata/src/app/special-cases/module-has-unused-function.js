@@ -24,7 +24,7 @@
     console.log('should remain in the module');
   }
 
-  function FactoryFunction() {
+  function FactoryFunction($stateProvider, $location) {
     return {
         require: 'ngModel',
         restrict: 'A',

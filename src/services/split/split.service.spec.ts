@@ -93,7 +93,7 @@ describe("ModuleSplitService", () => {
         const numberOfImported = splitDeclaration(r, filePath);
         expect(numberOfImported).toBe(4);
         expect(pathExistsSync(expectedFile)).toBeTruthy();
-        expect(openFile(expectedFile)).toContain(`function FactoryFunction() {`);
+        expect(openFile(expectedFile)).toContain(`function FactoryFunction($stateProvider, $location) {`);
         const moduleContent = openFile(expectedModuleFile) ;
         expect(moduleContent).toContain(`function unusedFunction(arg) {`);
         expect(moduleContent).toContain(`function secondUnusedFunction(ars) {`);

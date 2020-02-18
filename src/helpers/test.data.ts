@@ -109,6 +109,33 @@ const mapDataObj = `{
   }
 }`
 
+
+const moduleExample = `
+'use strict';
+
+import * as angular from 'angular';
+import { UserService } from './userservice.factory';
+import { logger } from './logger.factory';
+import { user } from './user.factory';
+import { FactoryFunction } from './factoryfunction.factory';
+;
+var echo = "fd";
+
+angular.module("ak.profile.unusedfunc", []).factory("FactoryFunction", FactoryFunction).factory('user', user).factory('logger', logger).factory('UserService', UserService);
+
+function unusedFunction(arg) {
+  return this;
+}
+
+function secondUnusedFunction(ars) {
+  console.log('should remain in the module');
+}
+
+class User {}
+
+;
+`;
+
 const mapData = (): Map<string, BasicModule> => {
   const result = new Map<string, BasicModule>();
   const raw = JSON.parse(mapDataObj)
@@ -119,4 +146,4 @@ const mapData = (): Map<string, BasicModule> => {
 }
 
 
-export { source, createTestData, deleteTestData, mapData };
+export { source, createTestData, deleteTestData, mapData, moduleExample };
