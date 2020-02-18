@@ -18,10 +18,10 @@ describe('AnnotateService', () => {
   test('should add all annotate to extracted function', async (done) => {
     const originalFile = testDir+'/src/app/special-cases/module-has-unused-function.js';
 
-    // const extracted = await extractModuleDeclaration(openFile(originalFile)).toPromise();
-    // splitDeclaration(extracted, originalFile);
-    // const content = annotateModule(testDir+'/src/app/special-cases/module-has-unused-function.module.js');
-    // expect(content).toContain(`factory("FactoryFunction", ['$stateProvider', '$location', FactoryFunction])`);
+    const extracted = await extractModuleDeclaration(openFile(originalFile)).toPromise();
+    splitDeclaration(extracted, originalFile);
+    const content = annotateModule(testDir+'/src/app/special-cases/module-has-unused-function.module.js');
+    expect(content).toContain(`factory("FactoryFunction", ['$stateProvider', '$location', FactoryFunction])`);
     expect(true).toBeTruthy();
     done();
   });

@@ -11,6 +11,20 @@ import { FoundImport } from './found-import';
 
 const contains = (array: string[], search: string) => array.find(elt => elt === search) != undefined
 
+/**
+ * Givent the following expression:
+ *
+ *  angular.module('module.name', [])
+ *     .factory('UserService', UserService).
+ *     .factory('UserController', UserController)
+ *     .constant('APP_URL', APP_URL)
+ *
+ * should return:
+ *  ['UserService', 'UserController']
+ *
+ * @param r
+ * @returns Array<string>
+ */
 const searchModuleToProcess = (r: TraverseResultExpressionStatement) => {
 
   const identifiers: string[] = [];
@@ -28,6 +42,17 @@ const searchModuleToProcess = (r: TraverseResultExpressionStatement) => {
   return identifiers;
 }
 
+/**
+ * Read a given javascript script and return the list of imports.
+ *
+ * Given the following:
+ *  import { ABX } from './folder/fileabx'
+ *  import { ABY } from './folder/filen-aby'
+ *
+ * Should return and array of those two imports statements
+ *
+ * @param file File
+ */
 const getImportDeclarations = (file: File): ImportDeclaration[] => {
   let results: ImportDeclaration[] = [];
   traverse(file, {
@@ -38,6 +63,21 @@ const getImportDeclarations = (file: File): ImportDeclaration[] => {
   return results;
 };
 
+/**
+ * Given the following imports:
+ *
+ *  import { ABX } from './folder/file-abx'
+ *  import { ABY } from './folder/file-aby'
+ *  import { ABZ } from './folder/file-abz'
+ * and
+ *  ['ABX', 'ABZ']
+ *
+ * Then calling this function should return the followings items:
+ *  [{source: './folder/file-abx', specifier: ABX}, {source: './folder/file-aby', specifier: ABY}]
+ *
+ * @param importDeclarations All import from a source fee. @see getImportDeclarations
+ * @param moduleToProcess List of all modules that need angular annotation injection. @see searchModuleToProcess
+ */
 const filterImport = (importDeclarations: ImportDeclaration[], moduleToProcess: string[]): FoundImport[] => {
   const result: FoundImport[] = [];
   importDeclarations.forEach(importDeclaration => {
@@ -50,6 +90,12 @@ const filterImport = (importDeclarations: ImportDeclaration[], moduleToProcess: 
   return result;
 };
 
+/**
+ *
+ * Scan a source file and return angularjs configs that need annotations.
+ *
+ * @param content code source to process
+ */
 const searchModuleConfigs = (content: string): Observable<ModuleConfg[]> => {
 
   // 1. search angular.module expression statement
