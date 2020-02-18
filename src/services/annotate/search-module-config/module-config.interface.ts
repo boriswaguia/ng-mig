@@ -1,6 +1,6 @@
-import { ImportSpecifier, Literal } from '@babel/types';
+import { ImportSpecifier, StringLiteral } from '@babel/types';
 
-export interface ModuleConfg {
+export interface ModuleConfig {
   specifier: ImportSpecifier,
-  source: Literal,
+  source: StringLiteral,
 };

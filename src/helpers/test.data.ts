@@ -136,6 +136,24 @@ class User {}
 ;
 `;
 
+
+const factoryFile = `
+function FactoryFunction($stateProvider, $location) {
+  return {
+      require: 'ngModel',
+      restrict: 'A',
+      link: function (scope, elemt, attrs, ctrl) {
+          ctrl.$vakudatirs.uiSelectRequired = function (modelValue, viewValue) {
+              var value = modelValue || viewValue;
+              return !!value.length;
+          }
+      }
+  }
+}
+`;
+
+const moduleImportDeclarationJson = `[{"source":{"type":"StringLiteral","start":80,"end":103,"loc":{"start":{"line":5,"column":28},"end":{"line":5,"column":51}},"extra":{"rawValue":"./userservice.factory","raw":"'./userservice.factory'"},"value":"./userservice.factory"},"specifier":{"type":"ImportSpecifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20}},"imported":{"type":"Identifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20},"identifierName":"UserService"},"name":"UserService"},"local":{"type":"Identifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20},"identifierName":"UserService"},"name":"UserService"}}},{"source":{"type":"StringLiteral","start":128,"end":146,"loc":{"start":{"line":6,"column":23},"end":{"line":6,"column":41}},"extra":{"rawValue":"./logger.factory","raw":"'./logger.factory'"},"value":"./logger.factory"},"specifier":{"type":"ImportSpecifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15}},"imported":{"type":"Identifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15},"identifierName":"logger"},"name":"logger"},"local":{"type":"Identifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15},"identifierName":"logger"},"name":"logger"}}},{"source":{"type":"StringLiteral","start":169,"end":185,"loc":{"start":{"line":7,"column":21},"end":{"line":7,"column":37}},"extra":{"rawValue":"./user.factory","raw":"'./user.factory'"},"value":"./user.factory"},"specifier":{"type":"ImportSpecifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13}},"imported":{"type":"Identifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13},"identifierName":"user"},"name":"user"},"local":{"type":"Identifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13},"identifierName":"user"},"name":"user"}}},{"source":{"type":"StringLiteral","start":219,"end":246,"loc":{"start":{"line":8,"column":32},"end":{"line":8,"column":59}},"extra":{"rawValue":"./factoryfunction.factory","raw":"'./factoryfunction.factory'"},"value":"./factoryfunction.factory"},"specifier":{"type":"ImportSpecifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24}},"imported":{"type":"Identifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24},"identifierName":"FactoryFunction"},"name":"FactoryFunction"},"local":{"type":"Identifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24},"identifierName":"FactoryFunction"},"name":"FactoryFunction"}}}]`;
+
 const mapData = (): Map<string, BasicModule> => {
   const result = new Map<string, BasicModule>();
   const raw = JSON.parse(mapDataObj)
@@ -146,4 +164,4 @@ const mapData = (): Map<string, BasicModule> => {
 }
 
 
-export { source, createTestData, deleteTestData, mapData, moduleExample };
+export { source, createTestData, deleteTestData, mapData, moduleExample, moduleImportDeclarationJson, factoryFile };

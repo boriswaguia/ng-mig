@@ -2,7 +2,7 @@ import { parseSourceTypeModule } from '../../../vendors/helpers/code-parser.help
 import { findModule } from '../../../vendors/helpers/traverse.helper';
 import {File, MemberExpression, Identifier, ImportDeclaration, ImportSpecifier} from '@babel/types';
 import traverse from '@babel/traverse';
-import { ModuleConfg } from './module-config.interface';
+import { ModuleConfig } from './module-config.interface';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { annotateCanditates } from '../annotate-candidates';
@@ -96,7 +96,7 @@ const filterImport = (importDeclarations: ImportDeclaration[], moduleToProcess: 
  *
  * @param content code source to process
  */
-const searchModuleConfigs = (content: string): Observable<ModuleConfg[]> => {
+const searchModuleConfigs = (content: string): Observable<ModuleConfig[]> => {
 
   // 1. search angular.module expression statement
   // 2. search .config, .factory, .service. identifiers
@@ -117,7 +117,7 @@ const searchModuleConfigs = (content: string): Observable<ModuleConfg[]> => {
       // 4
       const eligibleImports = filterImport(importDeclarations, moduleToProcess);
       // 5
-      const results: ModuleConfg[] = eligibleImports.map(e => ({source: e.source, specifier: e.specifier} as ModuleConfg));
+      const results: ModuleConfig[] = eligibleImports.map(e => ({source: e.source, specifier: e.specifier} as ModuleConfig));
       return results;
     })
   );
