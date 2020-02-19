@@ -1,10 +1,10 @@
 import { create } from "filehound";
 
-const getSourceFiles = (rootDir: string): string[] => {
+const getSourceFiles = (rootDir: string, ext = 'js'): string[] => {
   const srcDir = `${rootDir}/src`;
   const result = create()
     .paths(srcDir)
-    .ext('js')
+    .ext(ext)
     .findSync();
     return result;
 };

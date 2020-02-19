@@ -1,4 +1,4 @@
-import { FilePath } from '../split/module.type';
+import { FilePath, FolderPath } from '../split/module.type';
 import { openFile } from '../../vendors/helpers/file.helper';
 import { searchModuleConfigs } from './search-module-config/search-module-config.service';
 import { searchRequiredServices } from './search-required-services/search-required-services';
@@ -14,6 +14,7 @@ import { contains } from '../../helpers/array.helper';
 import { annotateCanditates } from './annotate-candidates';
 import { jsonPrint } from '../../helpers/print.helper';
 import { map_to_object } from '../../helpers/map.helper';
+import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 
 
 interface ConfigAndService {
@@ -102,5 +103,13 @@ const annotateModule = async (filePath: FilePath) => {
     return code;
 };
 
+const annotateFolder = (folderPath: FolderPath) => {
+  const modules = getSourceFiles(folderPath, '.module.js');
+  modules.forEach(filePath => {
+    console.log('---annotateModule---', filePath);
+    annotateModule(filePath).then(_=> {console.log(`----annoation finished----`)})
+  });
+};
 
-export { annotateModule, createArrayStatement };
+
+export { annotateModule, createArrayStatement, annotateFolder };
