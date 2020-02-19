@@ -1,5 +1,5 @@
 import { FilePath, FolderPath } from '../split/module.type';
-import { openFile } from '../../vendors/helpers/file.helper';
+import { openFile, writeFileSync } from '../../vendors/helpers/file.helper';
 import { searchModuleConfigs } from './search-module-config/search-module-config.service';
 import { searchRequiredServices } from './search-required-services/search-required-services';
 import { ModuleConfig } from './search-module-config/module-config.interface';
@@ -12,9 +12,10 @@ import { map } from 'rxjs/operators';
 import generate from "@babel/generator";
 import { contains } from '../../helpers/array.helper';
 import { annotateCanditates } from './annotate-candidates';
+import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
+import { from } from 'rxjs';
 import { jsonPrint } from '../../helpers/print.helper';
 import { map_to_object } from '../../helpers/map.helper';
-import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 
 
 interface ConfigAndService {
@@ -54,6 +55,16 @@ const createAnnotationStatmentsForModules = (configServiceMap: ConfigServiceMap)
   return result;
 };
 
+const getClassOrFunctionName = (node: bbt.CallExpression) => {
+  let classOrFunctionName = '';
+  if(node.arguments.length === 1 && bbt.isIdentifier(node.arguments[0])) {
+    classOrFunctionName = node.arguments[0].name;
+  } else if(node.arguments.length === 2 && bbt.isStringLiteral(node.arguments[0])) {
+    classOrFunctionName = (node.arguments[0] as bbt.StringLiteral).value;
+  }
+  return classOrFunctionName;
+}
+
 const updateModuleWithAnnotations = (filePath: FilePath, annotations: Map<string, ArrayExpression | bbt.Identifier>) => {
 
   // 1. search angular.module declaration
@@ -69,12 +80,15 @@ const updateModuleWithAnnotations = (filePath: FilePath, annotations: Map<string
         noScope: true,
         CallExpression: function(xPath) {
           const node = xPath.node;
-          const classOrFunctionName = node.arguments.length === 2 ? (node.arguments[0] as bbt.StringLiteral).value: undefined;
           const callerName = ((node.callee as bbt.MemberExpression).property as bbt.Identifier).name;
-          if( classOrFunctionName && contains(annotateCanditates, callerName) && annotations.get(classOrFunctionName) != undefined) {
-            // change or get existing.
-            console.log('--------changed--------', classOrFunctionName)
-            node.arguments[1] =  annotations.get(classOrFunctionName)!;
+          const shouldBeProcessed = contains(annotateCanditates, callerName);
+          const classOrFunctionName = getClassOrFunctionName(node);
+          if (shouldBeProcessed && annotations.get(classOrFunctionName) && node.arguments.length === 1) {
+            console.log(`----changed--- ${classOrFunctionName}`);
+            node.arguments[0] =  annotations.get(classOrFunctionName)!;
+          } else if (shouldBeProcessed && annotations.get(classOrFunctionName) && node.arguments.length === 2) {
+            console.log(`----changed--- ${classOrFunctionName}`);
+            node.arguments[1] = annotations.get(classOrFunctionName)!;
           } else {
             console.log('nothing found for  ----', classOrFunctionName);
           }
@@ -91,23 +105,31 @@ const annotateModule = async (filePath: FilePath) => {
   // 3. for imported module, search all the services they need
   // 4. create new array configs
   // 5. update angular module declaration expression
+      const content = openFile(filePath);
+      const moduleConfigs = await searchModuleConfigs(content).toPromise();
+      // console.log(`${filePath} - ${jsonPrint('', moduleConfigs)}`);
+      const configServiceMap = createImportedConfigServices(moduleConfigs, filePath);
 
-    const content = openFile(filePath);
-    const moduleConfigs = await searchModuleConfigs(content).toPromise();
+      // console.log(`${filePath} ----- `, jsonPrint('---------file----', map_to_object(configServiceMap)));
 
-    const configServiceMap = createImportedConfigServices(moduleConfigs, filePath);
-
-    const annotationExpressions = createAnnotationStatmentsForModules(configServiceMap);
-    const newContentFile =  await updateModuleWithAnnotations(filePath, annotationExpressions).toPromise();
-    const { code } = generate(newContentFile);
-    return code;
+      const annotationExpressions = createAnnotationStatmentsForModules(configServiceMap);
+      const newContentFile =  await updateModuleWithAnnotations(filePath, annotationExpressions).toPromise();
+      const { code } = generate(newContentFile);
+      return code;
 };
 
 const annotateFolder = (folderPath: FolderPath) => {
-  const modules = getSourceFiles(folderPath, '.module.js');
+  const modules = getSourceFiles(folderPath);
+  console.log('modules', modules);
   modules.forEach(filePath => {
     console.log('---annotateModule---', filePath);
-    annotateModule(filePath).then(_=> {console.log(`----annoation finished----`)})
+    from(annotateModule(filePath)).subscribe( code =>{
+      // console.log(`file ${filePath} ---- ${code}`);
+      writeFileSync(filePath, code);
+      console.log(`----annoation finished----`);
+    }, err => {
+      console.log(`---ERROR--- ${err}`);
+    });
   });
 };
 

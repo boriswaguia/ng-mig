@@ -7,7 +7,6 @@
     "rootDir": "src",
     "strict": true,
     "target": "es2017",
-    "strictNullChecks": true
   },
   "include": [
     "src/**/*", "testdata/src/angularjs-module-sample.mock.js"

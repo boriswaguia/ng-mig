@@ -33,8 +33,9 @@ const searchModuleToProcess = (r: TraverseResultExpressionStatement) => {
       const node = xPath.node;
       const callArguments = node.arguments;
       const callerName = ((node.callee as MemberExpression).property as Identifier).name;
-      if (contains(annotateCanditates, callerName) && callArguments.length == 2) {
-        identifiers.push((callArguments[1] as Identifier).name);
+      if (contains(annotateCanditates, callerName)) {
+        const serviceName = callArguments.length > 1 ? (callArguments[1] as Identifier).name: (callArguments[0] as Identifier).name
+        identifiers.push(serviceName);
       }
     }
   });

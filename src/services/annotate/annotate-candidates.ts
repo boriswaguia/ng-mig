@@ -1,1 +1,1 @@
-export const annotateCanditates = ['controller', 'config', 'factory', 'run'];
+export const annotateCanditates = ['controller', 'config', 'factory', 'run', 'directive'];
