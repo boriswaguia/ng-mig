@@ -1,6 +1,7 @@
 import { ModuleConfig } from './module-config.interface';
 import { moduleExample, moduleImportDeclarationJson } from '../../../helpers/test.data';
 import { searchModuleConfigs } from './search-module-config.service';
+import { jsonPrint } from '../../../helpers/print.helper';
 
 describe('SearchModuleConfigService', () => {
 

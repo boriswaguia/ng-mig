@@ -1,11 +1,11 @@
 import { ServiceQuery } from './service-query';
 import { createAbsolutePath } from './import-path-to-full-path.service';
 import { FilePath } from '../../split/module.type';
-import { FunctionDeclaration, ClassDeclaration, File, Identifier, ClassBody } from '@babel/types';
+import { FunctionDeclaration, ClassDeclaration, File, Identifier, ClassBody, VariableDeclarator, FunctionExpression } from '@babel/types';
 import { parseFileSourceTypeModule } from '../../../vendors/helpers/code-parser.helper';
 import traverse from '@babel/traverse';
 
-type D = FunctionDeclaration | ClassDeclaration | undefined;
+type D = FunctionDeclaration | ClassDeclaration | FunctionExpression | undefined;
 
 const searchItem = (filePath: FilePath, searchedElt: string): D => {
   // 1. open the file
@@ -14,6 +14,17 @@ const searchItem = (filePath: FilePath, searchedElt: string): D => {
   let r : D = undefined;
   const file: File = parseFileSourceTypeModule(filePath);
   traverse(file, {
+    VariableDeclaration: function(xPath) {
+      if (xPath.parent.loc?.start.line === 1) {
+        const declarations: VariableDeclarator[] = [...xPath.node.declarations];
+        const valids = declarations.filter(d => {
+          return (d.id as Identifier).name === searchedElt && d.init?.type === "FunctionExpression";
+        });
+        if (valids.length >= 1 && valids[0].init) {
+          r = (valids[0].init as FunctionExpression);
+        }
+      }
+    },
     FunctionDeclaration: function(xPath) {
       if(xPath.parent.loc?.start.line === 1 && xPath.node.id?.name === searchedElt) {
         r = xPath.node
@@ -30,7 +41,7 @@ const searchItem = (filePath: FilePath, searchedElt: string): D => {
 
 const findRequiredServices = (item: D): string[] => {
   if (!item) return [];
-  if (item.type === "FunctionDeclaration") {
+  if (item.type === "FunctionDeclaration" || item.type === "FunctionExpression") {
     return item.params.map(p => (p as Identifier).name)
   } else {
     const classBody = item.body as ClassBody;

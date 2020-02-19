@@ -118,10 +118,16 @@ import { UserService } from './userservice.factory';
 import { logger } from './logger.factory';
 import { user } from './user.factory';
 import { FactoryFunction } from './factoryfunction.factory';
+import { DummyService } from './dummyservice.service'
 ;
 var echo = "fd";
 
-angular.module("ak.profile.unusedfunc", []).factory("FactoryFunction", FactoryFunction).factory('user', user).factory('logger', logger).factory('UserService', UserService);
+angular.module("ak.profile.unusedfunc", [])
+  .factory("FactoryFunction", FactoryFunction)
+  .factory('user', user)
+  .factory('logger', logger)
+  .factory('UserService', UserService)
+  .factory('DummyService', DummyService);
 
 function unusedFunction(arg) {
   return this;
@@ -139,6 +145,7 @@ class User {}
 
 const factoryFunctionFile = `
 function FactoryFunction($stateProvider, $location) {
+  const FactoryFunction = this;
   return {
       require: 'ngModel',
       restrict: 'A',
@@ -175,7 +182,17 @@ class UserService {
 
 `
 
-const moduleImportDeclarationJson = `[{"source":{"type":"StringLiteral","start":80,"end":103,"loc":{"start":{"line":5,"column":28},"end":{"line":5,"column":51}},"extra":{"rawValue":"./userservice.factory","raw":"'./userservice.factory'"},"value":"./userservice.factory"},"specifier":{"type":"ImportSpecifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20}},"imported":{"type":"Identifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20},"identifierName":"UserService"},"name":"UserService"},"local":{"type":"Identifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20},"identifierName":"UserService"},"name":"UserService"}}},{"source":{"type":"StringLiteral","start":128,"end":146,"loc":{"start":{"line":6,"column":23},"end":{"line":6,"column":41}},"extra":{"rawValue":"./logger.factory","raw":"'./logger.factory'"},"value":"./logger.factory"},"specifier":{"type":"ImportSpecifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15}},"imported":{"type":"Identifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15},"identifierName":"logger"},"name":"logger"},"local":{"type":"Identifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15},"identifierName":"logger"},"name":"logger"}}},{"source":{"type":"StringLiteral","start":169,"end":185,"loc":{"start":{"line":7,"column":21},"end":{"line":7,"column":37}},"extra":{"rawValue":"./user.factory","raw":"'./user.factory'"},"value":"./user.factory"},"specifier":{"type":"ImportSpecifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13}},"imported":{"type":"Identifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13},"identifierName":"user"},"name":"user"},"local":{"type":"Identifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13},"identifierName":"user"},"name":"user"}}},{"source":{"type":"StringLiteral","start":219,"end":246,"loc":{"start":{"line":8,"column":32},"end":{"line":8,"column":59}},"extra":{"rawValue":"./factoryfunction.factory","raw":"'./factoryfunction.factory'"},"value":"./factoryfunction.factory"},"specifier":{"type":"ImportSpecifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24}},"imported":{"type":"Identifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24},"identifierName":"FactoryFunction"},"name":"FactoryFunction"},"local":{"type":"Identifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24},"identifierName":"FactoryFunction"},"name":"FactoryFunction"}}}]`;
+const serviceWithVariableDeclaration = `
+ 'use strict';
+ const DummyService = function($stateProvdier, ServiceA) {
+   const DummyService = this;
+   console.log('$stateProvdier', $stateProvdier);
+ }
+
+ export { DummyService };
+`;
+
+const moduleImportDeclarationJson = `[{"source":{"type":"StringLiteral","start":80,"end":103,"loc":{"start":{"line":5,"column":28},"end":{"line":5,"column":51}},"extra":{"rawValue":"./userservice.factory","raw":"'./userservice.factory'"},"value":"./userservice.factory"},"specifier":{"type":"ImportSpecifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20}},"imported":{"type":"Identifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20},"identifierName":"UserService"},"name":"UserService"},"local":{"type":"Identifier","start":61,"end":72,"loc":{"start":{"line":5,"column":9},"end":{"line":5,"column":20},"identifierName":"UserService"},"name":"UserService"}}},{"source":{"type":"StringLiteral","start":128,"end":146,"loc":{"start":{"line":6,"column":23},"end":{"line":6,"column":41}},"extra":{"rawValue":"./logger.factory","raw":"'./logger.factory'"},"value":"./logger.factory"},"specifier":{"type":"ImportSpecifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15}},"imported":{"type":"Identifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15},"identifierName":"logger"},"name":"logger"},"local":{"type":"Identifier","start":114,"end":120,"loc":{"start":{"line":6,"column":9},"end":{"line":6,"column":15},"identifierName":"logger"},"name":"logger"}}},{"source":{"type":"StringLiteral","start":169,"end":185,"loc":{"start":{"line":7,"column":21},"end":{"line":7,"column":37}},"extra":{"rawValue":"./user.factory","raw":"'./user.factory'"},"value":"./user.factory"},"specifier":{"type":"ImportSpecifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13}},"imported":{"type":"Identifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13},"identifierName":"user"},"name":"user"},"local":{"type":"Identifier","start":157,"end":161,"loc":{"start":{"line":7,"column":9},"end":{"line":7,"column":13},"identifierName":"user"},"name":"user"}}},{"source":{"type":"StringLiteral","start":219,"end":246,"loc":{"start":{"line":8,"column":32},"end":{"line":8,"column":59}},"extra":{"rawValue":"./factoryfunction.factory","raw":"'./factoryfunction.factory'"},"value":"./factoryfunction.factory"},"specifier":{"type":"ImportSpecifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24}},"imported":{"type":"Identifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24},"identifierName":"FactoryFunction"},"name":"FactoryFunction"},"local":{"type":"Identifier","start":196,"end":211,"loc":{"start":{"line":8,"column":9},"end":{"line":8,"column":24},"identifierName":"FactoryFunction"},"name":"FactoryFunction"}}},{"source":{"type":"StringLiteral","start":277,"end":301,"loc":{"start":{"line":9,"column":29},"end":{"line":9,"column":53}},"extra":{"rawValue":"./dummyservice.service","raw":"'./dummyservice.service'"},"value":"./dummyservice.service"},"specifier":{"type":"ImportSpecifier","start":257,"end":269,"loc":{"start":{"line":9,"column":9},"end":{"line":9,"column":21}},"imported":{"type":"Identifier","start":257,"end":269,"loc":{"start":{"line":9,"column":9},"end":{"line":9,"column":21},"identifierName":"DummyService"},"name":"DummyService"},"local":{"type":"Identifier","start":257,"end":269,"loc":{"start":{"line":9,"column":9},"end":{"line":9,"column":21},"identifierName":"DummyService"},"name":"DummyService"}}}]`;
 
 const mapData = (): Map<string, BasicModule> => {
   const result = new Map<string, BasicModule>();
@@ -187,4 +204,4 @@ const mapData = (): Map<string, BasicModule> => {
 }
 
 
-export { source, createTestData, deleteTestData, mapData, moduleExample, moduleImportDeclarationJson, factoryFunctionFile, serviceClassFile };
+export { source, createTestData, deleteTestData, mapData, moduleExample, moduleImportDeclarationJson, factoryFunctionFile, serviceClassFile, serviceWithVariableDeclaration };
