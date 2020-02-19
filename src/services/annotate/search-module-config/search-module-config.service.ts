@@ -8,8 +8,7 @@ import { Observable } from 'rxjs';
 import { annotateCanditates } from '../annotate-candidates';
 import { TraverseResultExpressionStatement } from '../../../vendors/helpers/traverse-result';
 import { FoundImport } from './found-import';
-
-const contains = (array: string[], search: string) => array.find(elt => elt === search) != undefined
+import { contains } from '../../../helpers/array.helper';
 
 /**
  * Givent the following expression:
@@ -39,6 +38,8 @@ const searchModuleToProcess = (r: TraverseResultExpressionStatement) => {
       }
     }
   });
+
+  console.log('identifiers', identifiers);
   return identifiers;
 }
 

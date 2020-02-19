@@ -4,7 +4,6 @@ import { FilePath } from '../../split/module.type';
 import { FunctionDeclaration, ClassDeclaration, File, Identifier } from '@babel/types';
 import { parseFileSourceTypeModule } from '../../../vendors/helpers/code-parser.helper';
 import traverse from '@babel/traverse';
-import { jsonPrint } from '../../../helpers/print.helper';
 
 type D = FunctionDeclaration | ClassDeclaration | undefined;
 
@@ -35,7 +34,7 @@ const findRequiredServices = (item: D): string[] => {
     return item.params.map(p => (p as Identifier).name)
   } else {
     const body = item.body;
-    jsonPrint('body', body);
+    // jsonPrint('body', body);
     return [];
   }
 };
@@ -50,7 +49,6 @@ const searchRequiredServices = (serviceQuery: ServiceQuery, currentFilePath: Fil
   const filePath = createAbsolutePath(serviceQuery.importPath, currentFilePath, '.js');// 1
   const item: D = searchItem(filePath, serviceQuery.elementId); // 2
   const requiredServices = findRequiredServices(item);// 3
-  console.log('requiredServices', requiredServices);
   return requiredServices;
 };
 
