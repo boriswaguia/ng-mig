@@ -126,7 +126,7 @@ const annotateFolder = (folderPath: FolderPath) => {
     from(annotateModule(filePath)).subscribe( code =>{
       // console.log(`file ${filePath} ---- ${code}`);
       writeFileSync(filePath, code);
-      console.log(`----annoation finished----`);
+      console.log(`----annotation finished----`);
     }, err => {
       console.log(`---ERROR--- ${err}`);
     });

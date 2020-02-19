@@ -1,7 +1,7 @@
 import { ServiceQuery } from './service-query';
 import { createAbsolutePath } from './import-path-to-full-path.service';
 import { FilePath } from '../../split/module.type';
-import { FunctionDeclaration, ClassDeclaration, File, Identifier } from '@babel/types';
+import { FunctionDeclaration, ClassDeclaration, File, Identifier, ClassBody } from '@babel/types';
 import { parseFileSourceTypeModule } from '../../../vendors/helpers/code-parser.helper';
 import traverse from '@babel/traverse';
 
@@ -33,9 +33,17 @@ const findRequiredServices = (item: D): string[] => {
   if (item.type === "FunctionDeclaration") {
     return item.params.map(p => (p as Identifier).name)
   } else {
-    const body = item.body;
-    // jsonPrint('body', body);
-    return [];
+    const classBody = item.body as ClassBody;
+    let result: string[] = [];
+    traverse(classBody, {
+      noScope: true,
+      ClassMethod: function(xPath) {
+        if (xPath.node.kind === "constructor") {
+          result = xPath.node.params.map(p => (p as Identifier).name);
+        }
+      }
+    });
+    return result;
   }
 };
 
