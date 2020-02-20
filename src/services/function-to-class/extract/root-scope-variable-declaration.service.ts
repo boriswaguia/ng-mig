@@ -2,7 +2,7 @@ import * as t from '@babel/types';
 import traverse from '@babel/traverse';
 
 
-const extractRootVariableDeclarations = (functionDeclaration: t.FunctionDeclaration) => {
+const extractRootVariableDeclarations = (functionDeclaration: t.FunctionDeclaration): t.VariableDeclaration[] => {
   const results: t.VariableDeclaration[] = [];
   traverse(functionDeclaration, {
     noScope: true,
