@@ -226,25 +226,29 @@ function UserController($location, UserService, USER_URL_ENDPOINT_CONST) {
 export { UserController };
 `;
 
-const expectedClass = `
-'use strict';
+const expectedClass = `'use strict';
+
 import _ from 'lodash';
 
 class UserController {
   constructor($location, UserService, USER_URL_ENDPOINT_CONST) {
-    this.$location = $location;
-    this.UserService = UserService;
-    this.USER_URL_ENDPOINT_CONST = USER_URL_ENDPOINT_CONST;
     this.vm = this;
-    this.count;
+    this.count = null;
     this.count2 = this.getNumber();
-    vm.count3 = this.getNumber()+count2;
+    vm.count3 = this.getNumber() + count2;
+
+    _.extend(vm, {
+      loading: true,
+      messages: []
+    });
+
     loadUsers();
   }
 
   loadUsers() {
     const xyz = 123;
-    if(!vm.loading) {
+
+    if (!vm.loading) {
       vm.loading = true;
       UserService.loadUsers(USER_URL_ENDPOINT_CONST);
       vm.loading = false;
@@ -252,10 +256,10 @@ class UserController {
       console.log('an operation already ongoing');
     }
   }
+
 }
 
-export { UserController };
-`;
+export { UserController };`;
 
 const mapData = (): Map<string, BasicModule> => {
   const result = new Map<string, BasicModule>();
