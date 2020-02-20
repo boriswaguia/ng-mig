@@ -15,11 +15,13 @@ const searchExportedMembersIds = (file: t.File, matchers = ['Controller', 'Servi
 const searchExportedMembers = (file: t.File, matchers = ['Controller', 'Service']) => {
   const results: t.ExportNamedDeclaration[] = [];
   traverse(file, {
+    // 1. search exported members
     ExportNamedDeclaration: function(xPath) {
       const node = xPath.node;
       if(node.specifiers && [...node.specifiers].length > 0) {
         const specifiers: t.ExportSpecifier[] = [...node.specifiers].map(s => s as t.ExportSpecifier);
 
+        // 2. check if it is processable (Controller || Service)
         const found = specifiers
           .filter(s => !!s.local)
           .map(s => (s.local.name as string))
