@@ -213,6 +213,7 @@ function UserController($location, UserService, USER_URL_ENDPOINT_CONST) {
   loadUsers();
 
   function loadUsers() {
+    const xyz = 123;
     if(!vm.loading) {
       vm.loading = true;
       UserService.loadUsers(USER_URL_ENDPOINT_CONST);
@@ -242,6 +243,7 @@ class UserController {
   }
 
   loadUsers() {
+    const xyz = 123;
     if(!vm.loading) {
       vm.loading = true;
       UserService.loadUsers(USER_URL_ENDPOINT_CONST);
