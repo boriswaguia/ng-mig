@@ -10,6 +10,9 @@ import { convertFunctionToClassMethods } from "./convert/function-to-class-metho
 import { parseSourceTypeModule } from '../../vendors/helpers/code-parser.helper';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
+import { FilePath, FolderPath } from '../split/module.type';
+import { openFile, writeFileSync } from '../../vendors/helpers/file.helper';
+import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 
 
 const createConstructor = (declaredArguments: string[], varInits: t.ExpressionStatement[], classInitStatements: t.ExpressionStatement[]): t.ClassMethod => {
@@ -40,9 +43,11 @@ const replaceFunctionWithClass = (code: string, ft: t.Identifier, classDeclarati
   });
   return file;
 }
-const convertToClass = (code: string) => {
+const convertToClass = (code: string): t.File | undefined => {
   // 1.
   const originalFunctions = searchExportedFunction(code);
+  if (originalFunctions.length === 0) return undefined;
+
   const selectedFunction = originalFunctions[0];
   // 2.
   // extract arguments
@@ -76,4 +81,21 @@ const convertToClass = (code: string) => {
   return result;
 };
 
-export { convertToClass };
+const convertFile = (filePath: FilePath) => {
+  console.log('----------started convertion -------'+filePath)
+  const source  = openFile(filePath);
+  const file = convertToClass(source);
+  if (file) {
+    writeFileSync(filePath, generate(file).code);
+    console.log('--------converted---------');
+  } else {
+    console.log('------nothing changed-----');
+  }
+}
+
+const convertFiles = (filePaths: FilePath[]) => filePaths.forEach(f => convertFile(f));
+
+const convertFolder = (folderPath: FolderPath) => {
+  convertFiles(getSourceFiles(folderPath));
+}
+export { convertToClass, convertFile, convertFiles, convertFolder };
