@@ -28,15 +28,15 @@ test('should create array expression', () => {
   console.log(json);
   expect(json).toBe(expected);
 });
-  // test('should add all annotate to extracted function', async (done) => {
-  //   const originalFile = testDir+'/src/app/special-cases/module-has-unused-function.js';
+  test('should add all annotate to extracted function', async (done) => {
+    const originalFile = testDir+'/src/app/special-cases/module-has-unused-function.js';
 
-  //   const extracted = await extractModuleDeclaration(openFile(originalFile)).toPromise();
-  //   splitDeclaration(extracted, originalFile);
-  //   const content = await annotateModule(testDir+'/src/app/special-cases/module-has-unused-function.module.js');
-  //   console.log('----------content-----', content);
-  //   expect(content).toContain(`factory("FactoryFunction", ["$stateProvider", "$location", FactoryFunction])`);
-  //   expect(true).toBeTruthy();
-  //   done();
-  // });
+    const extracted = await extractModuleDeclaration(openFile(originalFile)).toPromise();
+    splitDeclaration(extracted, originalFile);
+    const content = await annotateModule(testDir+'/src/app/special-cases/module-has-unused-function.module.js');
+    console.log('----------content-----', content);
+    expect(content).toContain(`factory("FactoryFunction", ["$stateProvider", "$location", FactoryFunction])`);
+    expect(true).toBeTruthy();
+    done();
+  });
 });
