@@ -10,6 +10,11 @@ import { openFile, writeFileSync, fileName, deleteFile } from '../../vendors/hel
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 import geneate from '@babel/generator';
 
+export interface ParseOptions {
+  rename?: boolean,
+  deleteSource?: boolean,
+  softMode?: boolean
+}
 const replaceCurrentClass = (source: string, currentClass: t.ClassDeclaration): t.File => {
   const file: t.File = parseSourceTypeModule(source);
 
@@ -21,35 +26,35 @@ const replaceCurrentClass = (source: string, currentClass: t.ClassDeclaration): 
   return file;
 }
 
-const parseToTypescript = (source: string): t.File => {
+const parseToTypescript = (source: string, softMode = false): t.File => {
   const availableVariables = extractDeclaredIds(source);
   const classDeclaration = createTsClass(extractAllClassMetaInfos(source));
-  const newClass = fixMissingThisKeys(classDeclaration, availableVariables);
+  const newClass = fixMissingThisKeys(classDeclaration, availableVariables, softMode);
 
   const newSource: t.File = replaceCurrentClass(source, newClass);
   return newSource;
 };
 
-const parseToTypescriptFile = (filePath: FilePath): [string, t.File] => {
-  const parsed = parseToTypescript(openFile(filePath));
+const parseToTypescriptFile = (filePath: FilePath, softMode = false): [string, t.File] => {
+  const parsed = parseToTypescript(openFile(filePath), softMode);
   return [filePath, parsed];
 };
-const parseToTypescriptFiles = (filePaths: FilePath[]) => filePaths.map(filePath => {
+const parseToTypescriptFiles = (filePaths: FilePath[], softMode = false) => filePaths.map(filePath => {
   console.log(`started parsing ${filePath}`);
-  const result = parseToTypescriptFile(filePath);
+  const result = parseToTypescriptFile(filePath, softMode);
   return result;
 });
-const parseToTypescriptFolder = (folderPath: FolderPath, rename: boolean, deleteSource: boolean) => {
+const parseToTypescriptFolder = (folderPath: FolderPath, options: ParseOptions) => {
   const files = getSourceFiles(folderPath);
-  const parsedFiles = parseToTypescriptFiles(files);
+  const parsedFiles = parseToTypescriptFiles(files, options.softMode);
   parsedFiles.forEach(file => {
     let path = file[0];
-    if (rename) {
+    if (options.rename) {
       path = path.replace('.js', '.ts');
     }
     writeFileSync(path, geneate(file[1]).code)
     console.log(`writting file to disk : ${path}`);
-    if (rename && deleteSource) {
+    if (options.rename && options.deleteSource) {
       console.log(`deleted file ${file[0]}`)
       deleteFile(file[0]);
     }
