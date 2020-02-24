@@ -21,4 +21,6 @@ const mkdirSync = (dirPath: string) => fse.mkdirSync(dirPath, { recursive: true}
 
 const pathExistsSync = (path: string) => fse.pathExistsSync(path);
 
-export {openFile, dirName, fileName, writeFileSync, renameSync, existsSync, copySync, mkdirSync, pathExistsSync};
+const deleteFile = (file: string) => fse.unlinkSync(file);
+
+export {openFile, dirName, fileName, writeFileSync, renameSync, existsSync, copySync, mkdirSync, pathExistsSync, deleteFile};

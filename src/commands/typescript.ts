@@ -12,7 +12,8 @@ export default class Typescript extends Command {
   static flags = {
     help: flags.help({char: 'h'}),
     project: flags.string({char: 'p', description: 'root project folder containing sources files in the src/ directory.'}),
-    rename: flags.boolean({char: 'r', description: 'set to true if you want to rename the file to .ts'})
+    rename: flags.boolean({char: 'r', description: 'set to true if you want to rename the file to .ts'}),
+    deleteSource: flags.boolean({char: 'd', description: 'set to true if you want to delete originals .js source files'})
   }
 
   async run() {
@@ -20,13 +21,17 @@ export default class Typescript extends Command {
 
     const project = flags.project || getCurrentDir();
     const rename = flags.rename || false;
+    const deleteSource = flags.rename || false;
 
     if (dirExist(project + "/src")) {
       this.log(`----------------------- Started to convert files in ${project} -------------------`);
       if (rename) {
         this.log(`--rename is set to ${rename}, the files will be renamed to .ts`);
+        if (deleteSource) {
+          this.log(`--deleteSource is set to ${deleteSource}, the files will be deleted`)
+        }
       }
-      parseToTypescriptFolder(project, rename);
+      parseToTypescriptFolder(project, rename, deleteSource);
     } else {
       this.log(
         `This is not a valid project folder. Make sure you have a directory src/ in this folder. ${project}`
