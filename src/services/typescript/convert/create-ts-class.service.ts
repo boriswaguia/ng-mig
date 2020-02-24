@@ -59,11 +59,17 @@ const createClass = (id: t.Identifier, members: (t.ClassMethod | t.ClassPrivateM
   const classNode = t.classDeclaration(id, superClass, body, decorators);
   return classNode;
 }
+const filterDuplicateUsingMap = (assigmentVars: t.Identifier[], constrParams: t.Identifier[]) => {
+  const result = new Map<string, t.Identifier>();
+  assigmentVars.forEach(av  => result.set(av.name, av));
+  constrParams.forEach(cp  => result.set(cp.name, cp));
+  return [...result.values()];
+};
 
 const createTsClass = (classMeta: ClassMeta): t.ClassDeclaration => {
-
   // class properties
-  const properties = [...classProperties(classMeta.assigmentVars!), ...classProperties(classMeta.constrParams!)];
+  const filteredProps = filterDuplicateUsingMap(classMeta.assigmentVars!, classMeta.constrParams!);
+  const properties = [...classProperties(filteredProps)];
   // constructor
   const paramsInitStatements = createConstructorParamInitStmts(classMeta.constrParams!);
   const constr: t.ClassMethod = classConstructor(classMeta.constrParams!, [...paramsInitStatements, ...classMeta.initStatements!]);
