@@ -12,7 +12,7 @@ export default class Typescript extends Command {
   static flags = {
     help: flags.help({char: 'h'}),
     project: flags.string({char: 'p', description: 'root project folder containing sources files in the src/ directory.'}),
-    rename: flags.boolean({char: 'r', description: 'set to true if you want to rename the file to .ts'});
+    rename: flags.boolean({char: 'r', description: 'set to true if you want to rename the file to .ts'})
   }
 
   async run() {
@@ -23,7 +23,9 @@ export default class Typescript extends Command {
 
     if (dirExist(project + "/src")) {
       this.log(`----------------------- Started to convert files in ${project} -------------------`);
-      this.log(`--rename is set to ${rename}, the files will not be renamed to .ts`)
+      if (rename) {
+        this.log(`--rename is set to ${rename}, the files will be renamed to .ts`);
+      }
       parseToTypescriptFolder(project, rename);
     } else {
       this.log(

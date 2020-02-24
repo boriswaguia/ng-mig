@@ -36,7 +36,7 @@ const parseToTypescriptFile = (filePath: FilePath): [string, t.File] => {
 };
 const parseToTypescriptFiles = (filePaths: FilePath[]) => filePaths.map(filePath => {
   console.log(`started parsing ${filePath}`);
-  const result = parseToTypescriptFile(openFile(filePath));
+  const result = parseToTypescriptFile(filePath);
   return result;
 });
 const parseToTypescriptFolder = (folderPath: FolderPath, rename: boolean) => {
@@ -48,7 +48,7 @@ const parseToTypescriptFolder = (folderPath: FolderPath, rename: boolean) => {
       path = path.replace('.js', '.ts');
     }
     writeFileSync(path, geneate(file[1]).code)
-    console.log(`writting file to disk : ${file[0]}`);
+    console.log(`writting file to disk : ${path}`);
   })
 }
 
