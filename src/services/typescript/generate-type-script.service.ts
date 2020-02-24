@@ -6,7 +6,7 @@ import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import { parseSourceTypeModule } from '../../vendors/helpers/code-parser.helper';
 import { FilePath, FolderPath } from '../split/module.type';
-import { openFile, writeFileSync } from '../../vendors/helpers/file.helper';
+import { openFile, writeFileSync, fileName } from '../../vendors/helpers/file.helper';
 import { getSourceFiles } from '../../vendors/helpers/dirwalk.helper';
 import geneate from '@babel/generator';
 
@@ -39,11 +39,15 @@ const parseToTypescriptFiles = (filePaths: FilePath[]) => filePaths.map(filePath
   const result = parseToTypescriptFile(openFile(filePath));
   return result;
 });
-const parseToTypescriptFolder = (folderPath: FolderPath) => {
+const parseToTypescriptFolder = (folderPath: FolderPath, rename: boolean) => {
   const files = getSourceFiles(folderPath);
   const parsedFiles = parseToTypescriptFiles(files);
   parsedFiles.forEach(file => {
-    writeFileSync(file[0], geneate(file[1]).code)
+    let path = file[0];
+    if (rename) {
+      path = path.replace('.js', '.ts');
+    }
+    writeFileSync(path, geneate(file[1]).code)
     console.log(`writting file to disk : ${file[0]}`);
   })
 }
