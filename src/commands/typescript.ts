@@ -21,7 +21,7 @@ export default class Typescript extends Command {
 
     const project = flags.project || getCurrentDir();
     const rename = flags.rename || false;
-    const deleteSource = flags.rename || false;
+    const deleteSource = flags.deleteSource || false;
 
     if (dirExist(project + "/src")) {
       this.log(`----------------------- Started to convert files in ${project} -------------------`);

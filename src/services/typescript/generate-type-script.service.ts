@@ -35,7 +35,7 @@ const parseToTypescript = (source: string): t.File => {
 };
 
 const parseToTypescriptFile = (filePath: FilePath): [string, t.File] => {
-  const parsed = parseToTypescript(openFile(filePath);
+  const parsed = parseToTypescript(openFile(filePath));
   return [filePath, parsed];
 };
 const parseToTypescriptFiles = (filePaths: FilePath[]) => filePaths.map(filePath => {
