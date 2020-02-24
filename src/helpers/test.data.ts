@@ -261,6 +261,47 @@ class UserController {
 
 export { UserController };`;
 
+
+const expectedTsClass = `'use strict';
+
+import _ from 'lodash';
+
+class UserController {
+  private vm: any;
+  private count: any;
+  private count2: any;
+
+  constructor(private $location: any, private UserService: any, private USER_URL_ENDPOINT_CONST: any) {
+    this.vm = this;
+    this.count = null;
+    this.count2 = this.getNumber();
+    this.vm.count3 = this.getNumber() + count2;
+
+    _.extend(this.vm, {
+      loading: true,
+      messages: []
+    });
+
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    const xyz = 123;
+
+    if (!this.vm.loading) {
+      this.vm.loading = true;
+      this.UserService.loadUsers(this.USER_URL_ENDPOINT_CONST);
+      this.vm.loading = false;
+    } else {
+      console.log('an operation already ongoing');
+    }
+  }
+
+}
+
+export { UserController };
+`;
+
 const mapData = (): Map<string, BasicModule> => {
   const result = new Map<string, BasicModule>();
   const raw = JSON.parse(mapDataObj)
@@ -271,4 +312,4 @@ const mapData = (): Map<string, BasicModule> => {
 }
 
 
-export { source, createTestData, deleteTestData, mapData, moduleExample, moduleImportDeclarationJson, factoryFunctionFile, serviceClassFile, serviceWithVariableDeclaration, exampleFunction, expectedClass };
+export { source, createTestData, deleteTestData, mapData, moduleExample, moduleImportDeclarationJson, factoryFunctionFile, serviceClassFile, serviceWithVariableDeclaration, exampleFunction, expectedClass, expectedTsClass };
