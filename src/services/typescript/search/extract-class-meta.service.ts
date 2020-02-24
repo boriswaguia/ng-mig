@@ -5,14 +5,24 @@ import traverse from '@babel/traverse';
 
 const extractAllClassMetaInfos = (source: string): ClassMeta => {
 
+  // class Id
+  let id: t.Identifier | undefined = undefined;
+
+  // extract contructor params
   const assigmentVars: t.Identifier[] = [];
+  // extract assigment variables
   const constrParams: t.Identifier[] = [];
+  // extract constructor init statement
   const initStatements: t.ExpressionStatement[] = []
+  // extract function declarations
   const classMethods: t.ClassMethod[] = [];
 
   const file = parseSourceTypeModule(source);
 
   traverse(file, {
+    ClassDeclaration: function(xPath) {
+      id = xPath.node.id;
+    },
     ClassMethod: function(xPath) {
       const node = xPath.node;
 
@@ -43,7 +53,7 @@ const extractAllClassMetaInfos = (source: string): ClassMeta => {
     }
   });
 
-  const result: ClassMeta = {assigmentVars, constrParams, classMethods, initStatements};
+  const result: ClassMeta = {id, assigmentVars, constrParams, classMethods, initStatements};
   return result;
 }
 export { extractAllClassMetaInfos };
