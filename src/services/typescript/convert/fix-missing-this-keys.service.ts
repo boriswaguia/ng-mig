@@ -13,41 +13,29 @@ const createAThisMemberExpression = (id: string): t.MemberExpression => {
 
 const isDeclared = (key: string, classVars: string[]) => classVars.filter(cv => cv === key).length > 0;
 
-const fixMissingThisKeys = (classDeclaration: t.ClassDeclaration, classVars: string[], softMode= false): t.ClassDeclaration => {
+const fixMissingThisKeys = (classDeclaration: t.ClassDeclaration, classVars: string[]): t.ClassDeclaration => {
   // search all call expression callee
   // search member expression objects
-  if (softMode) {
-    traverse(classDeclaration, {
-      noScope: true,
-      CallExpression: function(xPath) {
-        if (t.isIdentifier(xPath.node.callee) && isDeclared(xPath.node.callee.name, classVars)) {
-          xPath.node.callee = createAThisMemberExpression(xPath.node.callee.name);
-        }
-        if(xPath.node.arguments && xPath.node.arguments.length > 0) {
-          xPath.node.arguments.forEach((arg, index) => {
-            if (t.isIdentifier(arg) && isDeclared(arg.name, classVars)) {
-              xPath.node.arguments[index] = createAThisMemberExpression(arg.name);
-            }
-          })
-        }
-      },
-      MemberExpression: function(xPath) {
-        if (t.isIdentifier(xPath.node.object) && isDeclared(xPath.node.object.name, classVars)) {
-          xPath.node.object = createAThisMemberExpression(xPath.node.object.name);
-        }
+  traverse(classDeclaration, {
+    noScope: true,
+    CallExpression: function(xPath) {
+      if (t.isIdentifier(xPath.node.callee) && isDeclared(xPath.node.callee.name, classVars)) {
+        xPath.node.callee = createAThisMemberExpression(xPath.node.callee.name);
       }
-    })
-  } else {
-    // run a strong this.[field|method] fix
-    traverse(classDeclaration, {
-      noScope: true,
-      Identifier: function(xPath) {
-        if(isDeclared(xPath.node.name, classVars)) {
-          xPath.replaceWith(createAThisMemberExpression(xPath.node.name));
-        }
+      if(xPath.node.arguments && xPath.node.arguments.length > 0) {
+        xPath.node.arguments.forEach((arg, index) => {
+          if (t.isIdentifier(arg) && isDeclared(arg.name, classVars)) {
+            xPath.node.arguments[index] = createAThisMemberExpression(arg.name);
+          }
+        })
       }
-    })
-  }
+    },
+    MemberExpression: function(xPath) {
+      if (t.isIdentifier(xPath.node.object) && isDeclared(xPath.node.object.name, classVars)) {
+        xPath.node.object = createAThisMemberExpression(xPath.node.object.name);
+      }
+    }
+  });
 
   return classDeclaration;
 };

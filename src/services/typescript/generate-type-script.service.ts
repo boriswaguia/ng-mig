@@ -12,8 +12,7 @@ import geneate from '@babel/generator';
 
 export interface ParseOptions {
   rename?: boolean,
-  deleteSource?: boolean,
-  softMode?: boolean
+  deleteSource?: boolean
 }
 const replaceCurrentClass = (source: string, currentClass: t.ClassDeclaration): t.File => {
   const file: t.File = parseSourceTypeModule(source);
@@ -26,27 +25,27 @@ const replaceCurrentClass = (source: string, currentClass: t.ClassDeclaration): 
   return file;
 }
 
-const parseToTypescript = (source: string, softMode = false): t.File => {
+const parseToTypescript = (source: string): t.File => {
   const availableVariables = extractDeclaredIds(source);
   const classDeclaration = createTsClass(extractAllClassMetaInfos(source));
-  const newClass = fixMissingThisKeys(classDeclaration, availableVariables, softMode);
+  const newClass = fixMissingThisKeys(classDeclaration, availableVariables);
 
   const newSource: t.File = replaceCurrentClass(source, newClass);
   return newSource;
 };
 
-const parseToTypescriptFile = (filePath: FilePath, softMode = false): [string, t.File] => {
-  const parsed = parseToTypescript(openFile(filePath), softMode);
+const parseToTypescriptFile = (filePath: FilePath): [string, t.File] => {
+  const parsed = parseToTypescript(openFile(filePath);
   return [filePath, parsed];
 };
-const parseToTypescriptFiles = (filePaths: FilePath[], softMode = false) => filePaths.map(filePath => {
+const parseToTypescriptFiles = (filePaths: FilePath[]) => filePaths.map(filePath => {
   console.log(`started parsing ${filePath}`);
-  const result = parseToTypescriptFile(filePath, softMode);
+  const result = parseToTypescriptFile(filePath);
   return result;
 });
 const parseToTypescriptFolder = (folderPath: FolderPath, options: ParseOptions) => {
   const files = getSourceFiles(folderPath);
-  const parsedFiles = parseToTypescriptFiles(files, options.softMode);
+  const parsedFiles = parseToTypescriptFiles(files);
   parsedFiles.forEach(file => {
     let path = file[0];
     if (options.rename) {
