@@ -262,16 +262,18 @@ class UserController {
 export { UserController };`;
 
 
-const expectedTsClass = `'use strict';
+const expectedTsClass = `class UserController {
+  vm: any;
+  count: any;
+  count2: any;
+  $location: any;
+  UserService: any;
+  USER_URL_ENDPOINT_CONST: any;
 
-import _ from 'lodash';
-
-class UserController {
-  private vm: any;
-  private count: any;
-  private count2: any;
-
-  constructor(private $location: any, private UserService: any, private USER_URL_ENDPOINT_CONST: any) {
+  constructor($location, UserService, USER_URL_ENDPOINT_CONST) {
+    this.$location = $location;
+    this.UserService = UserService;
+    this.USER_URL_ENDPOINT_CONST = USER_URL_ENDPOINT_CONST;
     this.vm = this;
     this.count = null;
     this.count2 = this.getNumber();
@@ -297,10 +299,7 @@ class UserController {
     }
   }
 
-}
-
-export { UserController };
-`;
+}`;
 
 const mapData = (): Map<string, BasicModule> => {
   const result = new Map<string, BasicModule>();

@@ -34,6 +34,11 @@ const fixMissingThisKeys = (classDeclaration: t.ClassDeclaration, classVars: str
       if (t.isIdentifier(xPath.node.object) && isDeclared(xPath.node.object.name, classVars)) {
         xPath.node.object = createAThisMemberExpression(xPath.node.object.name);
       }
+    },
+    ObjectProperty: function(xPath) {
+      if(t.isIdentifier(xPath.node.value) && isDeclared(xPath.node.value.name, classVars)){
+        xPath.node.value = createAThisMemberExpression(xPath.node.value.name);
+      }
     }
   });
 

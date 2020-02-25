@@ -10,7 +10,7 @@ describe('CreateTSClassService', () => {
     const result = createTsClass(classMeta);
 
     const code = generate(result).code;
-    expect(code).toBe(expectedTsClass);
+    expect(code).toEqual(expectedTsClass);
   });
 
 });
