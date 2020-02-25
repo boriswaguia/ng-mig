@@ -47,7 +47,7 @@ const extractAllClassMetaInfos = (source: string): ClassMeta => {
           },
           ExpressionStatement: function(xPath) {
             const closestParentFunction = xPath.getFunctionParent();
-            if (closestParentFunction.isFunctionDeclaration() && closestParentFunction.node.id?.name === 'constructor') {
+            if (closestParentFunction.isClassMethod() && closestParentFunction.node.id?.name === 'constructor') {
               initStatements.push(xPath.node);
             }
           }
