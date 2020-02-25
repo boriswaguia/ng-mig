@@ -46,7 +46,10 @@ const extractAllClassMetaInfos = (source: string): ClassMeta => {
             }
           },
           ExpressionStatement: function(xPath) {
-            initStatements.push(xPath.node);
+            const closestParentFunction = xPath.getFunctionParent();
+            if (closestParentFunction.isFunctionDeclaration() && closestParentFunction.node.id?.name === 'constructor') {
+              initStatements.push(xPath.node);
+            }
           }
         })
       }
